@@ -26,6 +26,7 @@ export default function Header({ setPage }) {
 					</Typography>
 					<Button color="inherit" onClick={() => setPage('assessments')}>Assessments</Button>
 					<Button color="inherit" onClick={() => setPage('questionnaires')}>Questionnaires</Button>
+					<Button color="inherit" onClick={() => setPage('websites')}>Websites</Button>
 				</Toolbar>
 			</AppBar>
 		</div>

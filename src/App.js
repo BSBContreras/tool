@@ -14,7 +14,7 @@ const theme = createMuiTheme({
 });
 
 export default function App() {
-  const [page, setPage] = useState('assessments');
+  const [page, setPage] = useState('websites');
 
   return (
     <MuiThemeProvider theme={theme}>

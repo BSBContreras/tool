@@ -7,17 +7,12 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Chip from '@material-ui/core/Chip';
-import Input from '@material-ui/core/Input';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import CompletedStepsImage from '../../../../assets/completed_steps.png';
 
 const AssessmentDetails = ({ set, get }) => {
   const useStyles = makeStyles(theme => ({
@@ -74,131 +69,115 @@ const AssessmentDetails = ({ set, get }) => {
 }
 
 const ChooseGroups = () => {
-  // const useStyles = makeStyles((theme) => ({
-  //   root: {
-  //     width: '100%',
-  //     '& > * + *': {
-  //       marginTop: theme.spacing(3),
-  //     },
-  //   },
-  // }));
+  const useStyles = makeStyles((theme) => ({
+    root: {
+      width: '80%',
+      '& > * + *': {
+        marginTop: theme.spacing(3),
+      },
+    },
+  }));
 
-  // const top100Films = [
-  //   { title: 'The Shawshank Redemption', year: 1994 },
-  //   { title: 'The Godfather', year: 1972 },
-  //   { title: 'The Godfather: Part II', year: 1974 },
-  //   { title: 'The Dark Knight', year: 2008 },
-  //   { title: '12 Angry Men', year: 1957 },
-  //   { title: "Schindler's List", year: 1993 },
-  //   { title: 'Pulp Fiction', year: 1994 },
-  //   { title: 'The Lord of the Rings: The Return of the King', year: 2003 },
-  //   { title: 'The Good, the Bad and the Ugly', year: 1966 },
-  //   { title: 'Fight Club', year: 1999 },
-  //   { title: 'The Lord of the Rings: The Fellowship of the Ring', year: 2001 },
-  //   { title: 'Star Wars: Episode V - The Empire Strikes Back', year: 1980 },
-  //   { title: 'Forrest Gump', year: 1994 },
-  //   { title: 'Inception', year: 2010 },
-  //   { title: 'The Lord of the Rings: The Two Towers', year: 2002 },
-  //   { title: "One Flew Over the Cuckoo's Nest", year: 1975 },
-  //   { title: 'Goodfellas', year: 1990 },
-  //   { title: 'The Matrix', year: 1999 },
-  //   { title: 'Seven Samurai', year: 1954 },
-  //   { title: 'Star Wars: Episode IV - A New Hope', year: 1977 },
-  //   { title: 'City of God', year: 2002 },
-  //   { title: 'Se7en', year: 1995 },
-  //   { title: 'The Silence of the Lambs', year: 1991 },
-  //   { title: "It's a Wonderful Life", year: 1946 },
-  //   { title: 'Life Is Beautiful', year: 1997 },
-  //   { title: 'The Usual Suspects', year: 1995 },
-  //   { title: 'Léon: The Professional', year: 1994 },
-  //   { title: 'Spirited Away', year: 2001 },
-  //   { title: 'Saving Private Ryan', year: 1998 },
-  //   { title: 'Once Upon a Time in the West', year: 1968 },
-  //   { title: 'American History X', year: 1998 },
-  //   { title: 'Interstellar', year: 2014 },
-  //   { title: 'Casablanca', year: 1942 },
-  //   { title: 'City Lights', year: 1931 },
-  //   { title: 'Psycho', year: 1960 },
-  //   { title: 'The Green Mile', year: 1999 },
-  //   { title: 'The Intouchables', year: 2011 },
-  //   { title: 'Modern Times', year: 1936 },
-  //   { title: 'Raiders of the Lost Ark', year: 1981 },
-  //   { title: 'Rear Window', year: 1954 },
-  //   { title: 'The Pianist', year: 2002 },
-  //   { title: 'The Departed', year: 2006 },
-  //   { title: 'Terminator 2: Judgment Day', year: 1991 },
-  //   { title: 'Back to the Future', year: 1985 },
-  //   { title: 'Whiplash', year: 2014 },
-  //   { title: 'Gladiator', year: 2000 },
-  //   { title: 'Memento', year: 2000 },
-  //   { title: 'The Prestige', year: 2006 },
-  //   { title: 'The Lion King', year: 1994 },
-  //   { title: 'Apocalypse Now', year: 1979 },
-  //   { title: 'Alien', year: 1979 },
-  //   { title: 'Sunset Boulevard', year: 1950 },
-  //   { title: 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb', year: 1964 },
-  //   { title: 'The Great Dictator', year: 1940 },
-  //   { title: 'Cinema Paradiso', year: 1988 },
-  //   { title: 'The Lives of Others', year: 2006 },
-  //   { title: 'Grave of the Fireflies', year: 1988 },
-  //   { title: 'Paths of Glory', year: 1957 },
-  //   { title: 'Django Unchained', year: 2012 },
-  // ];
+  const profiles = [
+    { name: 'The Shawshank Redemption', year: 1994 },
+    { name: 'The Godfather', year: 1972 },
+    { name: 'The Godfather: Part II', year: 1974 },
+    { name: 'The Dark Knight', year: 2008 },
+    { name: '12 Angry Men', year: 1957 },
+    { name: "Schindler's List", year: 1993 },
+    { name: 'Pulp Fiction', year: 1994 },
+    { name: 'The Lord of the Rings: The Return of the King', year: 2003 },
+    { name: 'The Good, the Bad and the Ugly', year: 1966 },
+    { name: 'Fight Club', year: 1999 },
+    { name: 'The Lord of the Rings: The Fellowship of the Ring', year: 2001 },
+    { name: 'Star Wars: Episode V - The Empire Strikes Back', year: 1980 },
+    { name: 'Forrest Gump', year: 1994 },
+    { name: 'Inception', year: 2010 },
+    { name: 'The Lord of the Rings: The Two Towers', year: 2002 },
+    { name: "One Flew Over the Cuckoo's Nest", year: 1975 },
+    { name: 'Goodfellas', year: 1990 },
+    { name: 'The Matrix', year: 1999 },
+    { name: 'Seven Samurai', year: 1954 },
+    { name: 'Star Wars: Episode IV - A New Hope', year: 1977 },
+    { name: 'City of God', year: 2002 },
+    { name: 'Se7en', year: 1995 },
+    { name: 'The Silence of the Lambs', year: 1991 },
+    { name: "It's a Wonderful Life", year: 1946 },
+    { name: 'Life Is Beautiful', year: 1997 },
+    { name: 'The Usual Suspects', year: 1995 },
+    { name: 'Léon: The Professional', year: 1994 },
+    { name: 'Spirited Away', year: 2001 },
+    { name: 'Saving Private Ryan', year: 1998 },
+    { name: 'Once Upon a Time in the West', year: 1968 },
+    { name: 'American History X', year: 1998 },
+    { name: 'Interstellar', year: 2014 },
+    { name: 'Casablanca', year: 1942 },
+    { name: 'City Lights', year: 1931 },
+    { name: 'Psycho', year: 1960 },
+    { name: 'The Green Mile', year: 1999 },
+    { name: 'The Intouchables', year: 2011 },
+    { name: 'Modern Times', year: 1936 },
+    { name: 'Raiders of the Lost Ark', year: 1981 },
+    { name: 'Rear Window', year: 1954 },
+    { name: 'The Pianist', year: 2002 },
+    { name: 'The Departed', year: 2006 },
+    { name: 'Terminator 2: Judgment Day', year: 1991 },
+    { name: 'Back to the Future', year: 1985 },
+    { name: 'Whiplash', year: 2014 },
+    { name: 'Gladiator', year: 2000 },
+    { name: 'Memento', year: 2000 },
+    { name: 'The Prestige', year: 2006 },
+    { name: 'The Lion King', year: 1994 },
+    { name: 'Apocalypse Now', year: 1979 },
+    { name: 'Alien', year: 1979 },
+    { name: 'Sunset Boulevard', year: 1950 },
+    { name: 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb', year: 1964 },
+    { name: 'The Great Dictator', year: 1940 },
+    { name: 'Cinema Paradiso', year: 1988 },
+    { name: 'The Lives of Others', year: 2006 },
+    { name: 'Grave of the Fireflies', year: 1988 },
+    { name: 'Paths of Glory', year: 1957 },
+    { name: 'Django Unchained', year: 2012 },
+  ];
 
-  // const classes = useStyles();
+  const [value, setValue] = useState([]);
 
-  return <h1></h1>;
+  const handleChange = (event, newValue, reason) => {
+    if(reason === 'select-option') {
+      // opcao selecionada
+    }
+    if(reason === 'remove-option') {
+      // opcao removida
+    }
+    if(reason === 'clear') {
+      // todas selecoes foram apagadas
+    }
+    setValue(newValue);
+  }
 
-  // return (
-  //   <div className={classes.root}>
-  //     <Autocomplete
-  //       multiple
-  //       id="tags-standard"
-  //       options={top100Films}
-  //       getOptionLabel={(option) => option.title}
-  //       defaultValue={[top100Films[13]]}
-  //       renderInput={(params) => (
-  //         <TextField
-  //           {...params}
-  //           variant="standard"
-  //           label="Multiple values"
-  //           placeholder="Favorites"
-  //         />
-  //       )}
-  //     />
-  //     <Autocomplete
-  //       multiple
-  //       id="tags-outlined"
-  //       options={top100Films}
-  //       getOptionLabel={(option) => option.title}
-  //       defaultValue={[top100Films[13]]}
-  //       filterSelectedOptions
-  //       renderInput={(params) => (
-  //         <TextField
-  //           {...params}
-  //           variant="outlined"
-  //           label="filterSelectedOptions"
-  //           placeholder="Favorites"
-  //         />
-  //       )}
-  //     />
-  //     <Autocomplete
-  //       multiple
-  //       id="tags-filled"
-  //       options={top100Films.map((option) => option.title)}
-  //       defaultValue={[top100Films[13].title]}
-  //       freeSolo
-  //       renderTags={(value, getTagProps) =>
-  //         value.map((option, index) => (
-  //           <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-  //         ))
-  //       }
-  //       renderInput={(params) => (
-  //         <TextField {...params} variant="filled" label="freeSolo" placeholder="Favorites" />
-  //       )}
-  //     />
-  //   </div>
-  // );
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      <Autocomplete
+        multiple
+        value={value}
+        autoHighlight
+        id="group-selector"
+        options={profiles}
+        getOptionLabel={profile => profile.name}
+        onChange={handleChange}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="standard"
+            label="Groups"
+            placeholder="Choose any group"
+          />
+        )}
+      />
+    </div>
+  );
 }
 
 const ChooseQuestionnaire = ({ get, set }) => {
@@ -519,6 +498,20 @@ export default function StepperView() {
       display: 'flex',
       justifyContent: 'center'
     },
+    finalText: {
+      display: 'flex',
+      justifyContent: 'center'
+    },
+    finalContainer: {
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      height: 350,
+    },
+    image: {
+      display: 'block',
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
     buttons: {
       display: 'flex',
       alignItems: 'space-between',
@@ -531,7 +524,7 @@ export default function StepperView() {
       'Enter name and details about your assessment', 
       'Choose a questionnaire', 
       'Choose the tasks to be evaluated',
-      'Select groups'
+      'Choose groups'
     ];
   }
 
@@ -598,9 +591,23 @@ export default function StepperView() {
       <div>
         {activeStep === steps.length ? (
           <div>
-            <Typography className={classes.instructions}>All steps completed</Typography>
+            <div className={classes.finalContainer}>
+              <img 
+                className={classes.image}
+                src={CompletedStepsImage} 
+                width="500" 
+                heigth="300" 
+                alt="All steps have been completed!" 
+              />
+              <Typography 
+                className={classes.finalText} 
+                variant="h5"
+              >
+                All steps have been completed!
+              </Typography>
+            </div>
             <div className={classes.buttons}>
-              <Button onClick={handleReset}>Reset</Button>
+              <Button onClick={handleReset}>Create another Assessment</Button>
             </div>
           </div>
         ) : (
