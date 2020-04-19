@@ -5,11 +5,9 @@ export const WebsiteContext = createContext();
 export default function WebsiteProvider({ children }) {
   
   const websiteController = useState({});
-  const viewController = useState('show');
 
   const value = {
-    websiteController,
-    viewController
+    websiteController
   }
 
   return (

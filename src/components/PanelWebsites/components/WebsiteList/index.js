@@ -1,21 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { WebsiteContext } from '../../context/WebsiteContext';
-import { List, ListItem, ListItemText, ListItemIcon } from '@material-ui/core';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Add as AddIcon } from '@material-ui/icons';
 
 const WebsiteItem = ({ website }) => {
 
-  const { websiteController, viewController } = useContext(WebsiteContext);
+  const { websiteController } = useContext(WebsiteContext);
   const [currentWebsite, setCurrentWebsite] = websiteController;
-  const [view, setView] = viewController;
 
   const handleCurrentWebsite = () => {
-    if (currentWebsite !== website) {
-      setCurrentWebsite(website);
-      if(view !== 'show') {
-        setView('show');
-      }
-    }
+    setCurrentWebsite(website);
   }
 
   return (
@@ -34,24 +32,20 @@ const WebsiteItem = ({ website }) => {
 
 const CreateWebsite = () => {
 
-  const { websiteController, viewController } = useContext(WebsiteContext);
-  const [currentWebsite, setCurrentWebsite] = websiteController;
-  const [view, setView] = viewController;
+  // const { websiteController } = useContext(WebsiteContext);
+  // const [currentWebsite, setCurrentWebsite] = websiteController;
 
   const handleAddWebsite = () => {
-    if(view !== 'create') {
-      setView('create');
-      if(currentWebsite !== null) {
-        setCurrentWebsite(null);
-      }
-    }
+    alert('create');
   };
 
   return (
     <ListItem button onClick={handleAddWebsite}>
-      <ListItemIcon>
-        <AddIcon />
-      </ListItemIcon>
+      <ListItemSecondaryAction>
+        <IconButton edge="start">
+          <AddIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
       <ListItemText 
         primary="Add new website"
         secondary="Click here to add a new website"
