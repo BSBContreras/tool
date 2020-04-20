@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
+import api from '../../../../services/api';
 import { WebsiteContext } from '../../context/WebsiteContext';
+import CreateWebsiteDialog from './create';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
 import { Add as AddIcon } from '@material-ui/icons';
 
 const WebsiteItem = ({ website }) => {
@@ -32,65 +34,59 @@ const WebsiteItem = ({ website }) => {
 
 const CreateWebsite = () => {
 
-  // const { websiteController } = useContext(WebsiteContext);
-  // const [currentWebsite, setCurrentWebsite] = websiteController;
+  const [open, setOpen] = useState(false);
 
-  const handleAddWebsite = () => {
-    alert('create');
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
-    <ListItem button onClick={handleAddWebsite}>
-      <ListItemSecondaryAction>
-        <IconButton edge="start">
-          <AddIcon />
-        </IconButton>
-      </ListItemSecondaryAction>
-      <ListItemText 
-        primary="Add new website"
-        secondary="Click here to add a new website"
-      />
-    </ListItem>
+    <div>
+      <ListItem button onClick={handleClickOpen}>
+        <ListItemText 
+          primary="Add new website"
+          secondary="Click here to add a new website"
+        />
+        <ListItemSecondaryAction>
+          <IconButton edge="end" onClick={handleClickOpen}>
+            <AddIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+      <CreateWebsiteDialog open={open} handleClose={handleClose} />
+    </div>
   );
 }
 
 export default function WebsiteList() {
 
-  const [websites, setWebsite] = useState([]);
+  const [websites, setWebsites] = useState([]);
+  const { websiteController } = useContext(WebsiteContext);
+  const [ currentWebsite ] = websiteController;
 
-  const loadWebsites = () => {
-    setWebsite(
-      [
-        {
-          id: 1,
-          name: 'website 1',
-          url: 'http://www.website1.com'
-        },
-        {
-          id: 2,
-          name: 'website 2',
-          url: 'http://www.website2.com'
-        },
-        {
-          id: 3,
-          name: 'website 3',
-          url: 'http://www.website3.com'
-        },
-        {
-          id: 4,
-          name: 'website 4',
-          url: 'http://www.website4.com'
-        }
-      ]
-    );
+  const loadWebsites = async () => {
+    const response = await api.post('/websites/index.php');
+    const { data } = response;
+    if(data.status === 'success') {
+      setWebsites(data.docs);
+    } else {
+      alert('Error on load websites');
+    }
   }
 
   useEffect(() => {
     loadWebsites();
   }, []);
 
+  useEffect(() => {
+    loadWebsites();
+  }, [currentWebsite])
+
   return (
-    <List component="nav">
+    <List component="nav" style={{ height: 635, overflowY: 'auto' }}>
       <CreateWebsite />
       {websites.map(website => (
         <WebsiteItem key={website.id} website={website} button />

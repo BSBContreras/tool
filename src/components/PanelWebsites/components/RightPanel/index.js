@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
 import Grid from '@material-ui/core/Grid';
@@ -14,6 +14,7 @@ import AddIcon from '@material-ui/icons/Add';
 import MoreVert from '@material-ui/icons/MoreVert'
 import Delete from '@material-ui/icons/Delete'
 import Tooltip from '@material-ui/core/Tooltip';
+import CreateWebsiteDialog from '../WebsiteList/create';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import { TaskContext } from '../../context/TaskContext';
 import TaskProvider from '../../context/TaskContext';
@@ -308,6 +309,15 @@ export default function ShowAssessmentPanel() {
   const { websiteController } = useContext(WebsiteContext);
   const [ website ] = websiteController;
 
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleClickOpenDialog = () => {
+    setOpenDialog(true);
+  };
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   const classes = useStyles();
 
   return (
@@ -348,10 +358,11 @@ export default function ShowAssessmentPanel() {
             style={{ color: '#88f', margin: 30, cursor: 'pointer' }} 
             align="center" 
             variant="subtitle1"
-            onClick={() => alert('create website')}
+            onClick={handleClickOpenDialog}
           >
             Or Click here to add a New Website
-          </Typography> 
+          </Typography>
+          <CreateWebsiteDialog open={openDialog} handleClose={handleCloseDialog} />
         </div>
       )}
     </Grid>
