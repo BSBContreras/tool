@@ -12,6 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Collapse from '@material-ui/core/Collapse';
+import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Alert from '@material-ui/lab/Alert'
 
@@ -65,9 +66,6 @@ export default function CreatePage({ open, handleClose }) {
   const [elements, setElements] = useState([]);
   const [errors, setErrors] = useState([]);
 
-  const validName = name => name.length >= 3 ? true : false;
-  const validUrl = url => url[0] === '/' ? true : false;
-
   const loadElements = async () => {
     const response = await api.post('/elements/index.php');
     const { data } = response;
@@ -79,7 +77,11 @@ export default function CreatePage({ open, handleClose }) {
   }
 
   const storePage = async () => {
-    alert('store page')
+    console.log({
+      name, url,
+      website_id: Number(currentWebsite.id),
+      elements_id: selectedElements.map(element => Number(element.id))
+    })
     // const response = await api.post('/websites/store.php', {
     //   designer_id: Number(designer.id),
     //   name, url
@@ -108,13 +110,16 @@ export default function CreatePage({ open, handleClose }) {
 
   const handleSelectetElement = element => {
     if(!element) return;
-    console.log(element)
-    if(selectedElements.length < 5) {
-      setSelectedElements([...selectedElements, element]);
-    } else {
-      alert('maximum elements');
-    }
+    setSelectedElements([...selectedElements, element]);
   }
+
+  const handleRemoveElement = index => {
+    setSelectedElements(selectedElements.filter((element, i) => index !== i ));
+  }
+
+  const validName = name => name.length >= 3 ? true : false;
+  const validUrl = url => url[0] === '/' ? true : false;
+  const validEments = elements => elements.length < 5 ? true : false;
 
   const withoutErrors = () => {
     const errors = [];
@@ -122,7 +127,10 @@ export default function CreatePage({ open, handleClose }) {
       errors.push('Please enter a name with at least 3 characters')
     }
     if(!validUrl(url)) {
-      errors.push('Please enter a valid address');
+      errors.push('Please enter a valid address, starts with "/"');
+    }
+    if(!validEments(selectedElements)) {
+      errors.push('Select up to 5 elements');
     }
     setErrors(errors);
     return errors.length === 0;
@@ -172,19 +180,26 @@ export default function CreatePage({ open, handleClose }) {
           onChange={handleChageUrl}
         />
         <Typography style={{ marginTop: 10 }} gutterBottom> 
-          Elements
+          Interaction Elements
         </Typography>
         <Autocomplete
           autoHighlight
+          clearOnEscape
           options={elements}
           getOptionLabel={element => element.name}
           onChange={(event, newValue) => handleSelectetElement(newValue)}
           style={{ width: '100%' }}
           renderInput={(params) => <TextField {...params} label="Element name" variant="outlined" />}
         />
-        <ul>{selectedElements.map(element => (
-          <li key={element.id}>{element.name}</li>
-        ))}</ul>
+        {selectedElements.map((element, index) => (
+          <Chip
+            key={index}
+            color="primary"
+            style={{ marginTop: 10, marginRight: 5 }}
+            label={element.name}
+            onDelete={() => handleRemoveElement(index)}
+          />
+        ))}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
