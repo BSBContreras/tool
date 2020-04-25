@@ -55,46 +55,45 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-export default function CreateWebsite({ open, handleClose }) {
-  const regexUrl = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/g;
+export default function CreatePage({ open, handleClose }) {
   const { websiteController } = useContext(WebsiteContext);
-  const [currentWebsite, setCurrentWebsite] = websiteController;
+  const [ currentWebsite ] = websiteController;
 
   const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-  const [designers, setDesigners] = useState([]);
-  const [designer, setDesigner] = useState({});
+  const [url, setUrl] = useState('/');
+  const [selectedElements, setSelectedElements] = useState([]);
+  const [elements, setElements] = useState([]);
   const [errors, setErrors] = useState([]);
 
   const validName = name => name.length >= 3 ? true : false;
-  const validUrl = url => regexUrl.exec(url) ? true : false;
-  const validDesigner = designer => designer.id ? true : false;
+  const validUrl = url => url[0] === '/' ? true : false;
 
-  const loadDesigners = async () => {
-    const response = await api.post('/designers/index.php');
+  const loadElements = async () => {
+    const response = await api.post('/elements/index.php');
     const { data } = response;
     if(data.status === 'success') {
-      setDesigners(data.docs);
+      setElements(data.docs);
     } else {
-      alert('Error on load designers');
+      alert('Error on load elements');
     }
   }
 
-  const storeWebsite = async () => {
-    const response = await api.post('/websites/store.php', {
-      designer_id: Number(designer.id),
-      name, url
-    });
-    const { data } = response;
-    if(data.status === 'success') {
-      setCurrentWebsite(data.docs);
-    } else {
-      alert('Error on load designers');
-    }
+  const storePage = async () => {
+    alert('store page')
+    // const response = await api.post('/websites/store.php', {
+    //   designer_id: Number(designer.id),
+    //   name, url
+    // });
+    // const { data } = response;
+    // if(data.status === 'success') {
+    //   setCurrentWebsite(data.docs);
+    // } else {
+    //   alert('Error on load designers');
+    // }
   }
 
   useEffect(() => {
-    loadDesigners();
+    loadElements();
   }, [])
 
   const handleChageName = event => {
@@ -107,8 +106,14 @@ export default function CreateWebsite({ open, handleClose }) {
     value.length <= 150 && setUrl(value);
   }
 
-  const handleChangeDesigner = designer => {
-    designer ? setDesigner(designer) : setDesigner({})
+  const handleSelectetElement = element => {
+    if(!element) return;
+    console.log(element)
+    if(selectedElements.length < 5) {
+      setSelectedElements([...selectedElements, element]);
+    } else {
+      alert('maximum elements');
+    }
   }
 
   const withoutErrors = () => {
@@ -119,38 +124,26 @@ export default function CreateWebsite({ open, handleClose }) {
     if(!validUrl(url)) {
       errors.push('Please enter a valid address');
     }
-    if(!validDesigner(designer)) {
-      errors.push('Please select a designer ')
-    }
     setErrors(errors);
     return errors.length === 0;
   }
 
   const submit = () => {
     if(withoutErrors()) {
-      storeWebsite();
+      storePage();
       handleClose();
       setName('');
       setUrl('');
-      setDesigner({});
+      setSelectedElements([]);
     }
   }
 
   return (
     <Dialog onClose={handleClose} open={open} fullWidth>
       <DialogTitle onClose={handleClose}>
-        Add Website
+        Add Page
       </DialogTitle>
       <DialogContent dividers>
-        {currentWebsite.id && (
-          <Alert
-            variant="filled"
-            severity="warning"
-            style={{ marginBottom: 10 }}
-          >
-            Make sure the changes to the website "{currentWebsite.name}" have been saved
-          </Alert>
-        )}
         <Collapse in={errors.length > 0}>
           <Alert 
             variant="filled"
@@ -159,19 +152,19 @@ export default function CreateWebsite({ open, handleClose }) {
             {errors.join(', ')}
           </Alert>
         </Collapse>
-        <Typography style={{ marginTop: 10 }} gutterBottom> Website Name </Typography>
+        <Typography style={{ marginTop: 10 }} gutterBottom> Page Name </Typography>
         <TextField 
           id="name" 
-          label="ex: USP website" 
+          label="ex: home page" 
           variant="outlined"
           value={name}
           fullWidth
           onChange={handleChageName}
         />
-        <Typography style={{ marginTop: 10 }} gutterBottom> Website address </Typography>
+        <Typography style={{ marginTop: 10 }} gutterBottom> Page address </Typography>
         <TextField 
           id="url" 
-          label="ex: https://www5.usp.br" 
+          label="ex: /home" 
           variant="outlined"
           type="url"
           value={url}
@@ -179,16 +172,19 @@ export default function CreateWebsite({ open, handleClose }) {
           onChange={handleChageUrl}
         />
         <Typography style={{ marginTop: 10 }} gutterBottom> 
-          Designer{designer.name && `: "${designer.name}"`}
+          Elements
         </Typography>
         <Autocomplete
           autoHighlight
-          options={designers}
-          getOptionLabel={designer => designer.email}
-          onChange={(event, newValue) => handleChangeDesigner(newValue)}
+          options={elements}
+          getOptionLabel={element => element.name}
+          onChange={(event, newValue) => handleSelectetElement(newValue)}
           style={{ width: '100%' }}
-          renderInput={(params) => <TextField {...params} label="Designer email" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label="Element name" variant="outlined" />}
         />
+        <ul>{selectedElements.map(element => (
+          <li key={element.id}>{element.name}</li>
+        ))}</ul>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
@@ -199,7 +195,7 @@ export default function CreateWebsite({ open, handleClose }) {
           color="primary"
           onClick={submit}
         >
-          Add Website
+          Add Page
         </Button>
       </DialogActions>
     </Dialog>

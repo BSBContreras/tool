@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
+import CreatePageDialog from './createPage';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button'
@@ -28,7 +29,7 @@ const TaskAdd = () => {
           primary="Add new task"
           secondary="Click here to add a new task"
         />
-        <ListItemSecondaryAction>
+        <ListItemSecondaryAction onClick={() => {}}>
           <IconButton edge="end">
             <AddIcon fontSize="large" style={{ color: 'green' }} />
           </IconButton>
@@ -116,19 +117,29 @@ const TaskList = ({ website }) => {
 }
 
 const PageAdd = () => {
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <Paper style={{ background: '#9f9' }}>
-      <ListItem button onClick={() => {}}>
+      <ListItem button onClick={handleClickOpen}>
         <ListItemText 
           primary="Add new page"
           secondary="Click here to add a new page"
         />
-        <ListItemSecondaryAction>
+        <ListItemSecondaryAction onClick={handleClickOpen}>
           <IconButton edge="end">
             <AddIcon fontSize="large" style={{ color: 'green' }} />
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>
+      <CreatePageDialog open={open} handleClose={handleClose} />
     </Paper>
   );
 }
