@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import api from '../../../../services/api';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
 import CreatePageDialog from './createPage';
 import CreateTaskDialog from './createTask';
@@ -20,7 +21,6 @@ import CreateWebsiteDialog from '../WebsiteList/create';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import { TaskContext } from '../../context/TaskContext';
 import TaskProvider from '../../context/TaskContext';
-
 
 const TaskAdd = () => {
   const [open, setOpen] = useState(false);
@@ -60,7 +60,7 @@ const TaskItemAvailble = ({ task }) => {
         <Tooltip title="Add task in the constructor" arrow placement="top">
           <ListItemText 
             primary={<Typography style={{ color: '#FFF' }}>{task.name}</Typography>}
-            secondary={<Typography variant="subtitle2" style={{ color: '#EEE' }}>{task.details}</Typography>}
+            secondary={<Typography variant="subtitle2" style={{ color: '#EEE' }}>{task.detail}</Typography>}
           />
         </Tooltip>
       </ListItem>
@@ -75,7 +75,7 @@ const TaskItemUnavailable = ({ task }) => {
         <Tooltip title="This task is used by some assessment" arrow placement="top">
           <ListItemText 
             primary={task.name}
-            secondary={task.details}
+            secondary={task.detail}
           />
         </Tooltip>
       </ListItem>
@@ -86,31 +86,35 @@ const TaskItemUnavailable = ({ task }) => {
 const TaskList = ({ website }) => {
   const Divider = () => <hr></hr>;
 
-  const availableTasks = [
-    {
-      id: 1,
-      name: 'Buy Bread',
-      details: 'When the morning come, i will open my eyes and buy a beatiful peace of bread'
-    },
-    {
-      id: 2,
-      name: 'View clothes',
-      details: 'View all the stuff of the store, and check the price.'
-    },
-  ]
+  const { newTaskAddController } = useContext(TaskContext);
+  const [ newTaskAdd, setNewTaskAdd ] = newTaskAddController;
 
-  const unavailableTasks = [
-    {
-      id: 3,
-      name: 'task 3',
-      details: 'task details 3'
-    },
-    {
-      id: 4,
-      name: 'task 4',
-      details: 'task details 4'
-    },
-  ]
+  const [availableTasks, setAvailableTasks] = useState([]);
+
+  const loadTasks = async (id) => {
+    const response = await api.post('/websites/tasks.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setAvailableTasks(data.docs);
+    } else {
+      alert('Error on load tasks');
+    }
+  }
+
+  useEffect(() => {
+    if(website.id) {
+      loadTasks(website.id);
+    }
+  }, [website])
+
+  useEffect(() => {
+    if(newTaskAdd && website.id) {
+      loadTasks(website.id);
+      setNewTaskAdd(false);
+    }
+  }, [newTaskAdd, website, setNewTaskAdd])
+
+  const unavailableTasks = []
 
   return (
     <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
@@ -159,10 +163,8 @@ const PageItem = ({ page }) => {
   const { pagesController } = useContext(TaskContext);
   const [selectedsPages, setSelectedsPages] = pagesController;
 
-  const rand = () => Math.floor(Math.random() * 100000);
-
   const handleAddPage = () => {
-    setSelectedsPages([...selectedsPages, {...page, key: rand() }])
+    setSelectedsPages([...selectedsPages, page])
   }
 
   return (
@@ -180,28 +182,33 @@ const PageItem = ({ page }) => {
 }
 
 const PageList = ({ website }) => {
-  const pages = [
-    {
-      id: 1,
-      name: 'page 1',
-      url: '/page1'
-    },
-    {
-      id: 2,
-      name: 'page 2',
-      url: '/page1'
-    },
-    {
-      id: 3,
-      name: 'page 3',
-      url: '/page1'
-    },
-    {
-      id: 4,
-      name: 'page 4',
-      url: '/page1'
-    },
-  ]
+  const { newPageAddController } = useContext(TaskContext);
+  const [ newPageAdd, setNewPageAdd ] = newPageAddController;
+
+  const [pages, setPages] = useState([]);
+
+  const loadPages = async (id) => {
+    const response = await api.post('/websites/pages.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setPages(data.docs);
+    } else {
+      alert('Error on load pages');
+    }
+  }
+
+  useEffect(() => {
+    if(website.id) {
+      loadPages(website.id);
+    }
+  }, [website])
+
+  useEffect(() => {
+    if(newPageAdd && website.id) {
+      loadPages(website.id);
+      setNewPageAdd(false);
+    }
+  }, [newPageAdd, website, setNewPageAdd])
 
   return (
     <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
@@ -231,12 +238,12 @@ const TaskHeader = ({ task }) => {
   );
 }
 
-const RouteItem = ({ page }) => {
+const RouteItem = ({ page, index }) => {
   const { pagesController } = useContext(TaskContext);
   const [ selectedsPages, setSelectedsPages ] = pagesController;
 
   const handleRemove = () => {
-    const filteredPages = selectedsPages.filter(selectedPage => selectedPage.key !== page.key);
+    const filteredPages = selectedsPages.filter((selectedPage, i) => index !== i);
     setSelectedsPages(filteredPages);
   }
 
@@ -262,25 +269,89 @@ const RouteItem = ({ page }) => {
 const Constructor = () => {
   const Divider = () => <hr></hr>;
 
-  const { pagesController, taskController } = useContext(TaskContext);
+  const { websiteController } = useContext(WebsiteContext);
+  const [ currentWebsite ] = websiteController;
+
+  const { pagesController, taskController, newTaskAddController } = useContext(TaskContext);
   const [ selectedsPages, setSelectedsPages ] = pagesController;
-  const [ task ] = taskController;
+  const [ newTaskAdd, setNewTaskAdd ] = newTaskAddController;
+  const [ currentTask, setCurrentTask ] = taskController;
+
+  const storeTask = async (task) => {
+    const response = await api.post('/tasks/store.php', task);
+    const { data } = response;
+    if(data.status === 'success') {
+      if(!newTaskAdd) {
+        setNewTaskAdd(true);
+        setCurrentTask({...currentTask, id: Number(data.docs.id) })
+      }
+    } else {
+      alert('Error on create task');
+    }
+  }
+
+  const syncNewPages = async (pages) => {
+    const response = await api.post('/tasks/sync.php', { id: Number(currentTask.id), pages });
+    const { data } = response;
+    if(data.status === 'success') {
+      alert('Successfully saved!');
+    } else {
+      alert('Error on save task');
+    }
+  }
+
+  const handleSaveTask = () => {
+    syncNewPages(selectedsPages.map(page => Number(page.id)));
+  }
+
+  const handleCreateTask = () => {
+    if(selectedsPages.length > 0) {
+      storeTask({
+        name: currentTask.name,
+        detail: currentTask.detail,
+        pages: selectedsPages.map(page => Number(page.id))
+      });
+    }
+  }
 
   useEffect(() => {
-    setSelectedsPages([]);
-  }, [task, setSelectedsPages]);
+    if(selectedsPages.length > 0) {
+      setSelectedsPages([]);
+    }
+    if(currentTask.name) {
+      setCurrentTask({});
+    }
+    // eslint-disable-next-line
+  }, [currentWebsite]);
+
+  useEffect(() => {
+    if(currentTask.id) {
+      const loadPagesRoute = async (id) => {
+        const response = await api.post('/tasks/pages.php', { id: Number(id) });
+        const { data } = response;
+        if(data.status === 'success') {
+          setSelectedsPages(data.docs)
+        } else {
+          alert('Error on load pages task');
+        }
+      }
+      loadPagesRoute(currentTask.id);
+    } else {
+      setSelectedsPages([])
+    }
+  }, [setSelectedsPages, currentTask]);
 
   return (
     <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto' }}>
-      {task.id ? (
+      {currentTask.id ? (
         <div>
-          <TaskHeader task={task} />
-          {selectedsPages.map(page => (
-            <RouteItem key={page.key} page={page} />
+          <TaskHeader task={currentTask} />
+          {selectedsPages.map((page, index) => (
+            <RouteItem key={index} page={page} index={index} />
           ))}
           <Button 
             fullWidth
-            onClick={() => alert('save task')}
+            onClick={handleSaveTask}
             disabled={selectedsPages.length === 0}
             style={{ 
               marginTop: 10, 
@@ -294,6 +365,32 @@ const Constructor = () => {
                 <Divider />
                 <Typography align="center" style={{ color: '#999' }}>
                   Select any page on the right to save this task
+                </Typography>
+              </div>
+            )}
+        </div>
+      ) : currentTask.name ? (
+        <div>
+          <TaskHeader task={currentTask} />
+          {selectedsPages.map((page, index) => (
+            <RouteItem key={index} page={page} index={index} />
+          ))}
+          <Button 
+            fullWidth
+            onClick={handleCreateTask}
+            disabled={selectedsPages.length === 0}
+            style={{ 
+              marginTop: 10, 
+              background: selectedsPages.length === 0 ? '#DDD' :'linear-gradient(45deg, #77EE77 30%, #99EE99 90%)', 
+              color: selectedsPages.length === 0 ? '#000' : '#333' 
+            }}>
+              Create Task
+            </Button>
+            {selectedsPages.length === 0 && (
+              <div>
+                <Divider />
+                <Typography align="center" style={{ color: '#999' }}>
+                  Select any page on the right to create this task first time
                 </Typography>
               </div>
             )}

@@ -6,10 +6,14 @@ export default function TaskProvider({ children }) {
   
   const taskController = useState({});
   const pagesController = useState([]);
+  const newPageAddController = useState(false);
+  const newTaskAddController = useState(false);
 
   const value = {
     taskController,
-    pagesController
+    pagesController,
+    newPageAddController,
+    newTaskAddController
   }
 
   return (

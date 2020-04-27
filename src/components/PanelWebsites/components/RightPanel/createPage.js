@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { WebsiteContext } from '../../context/WebsiteContext';
+import { TaskContext } from '../../context/TaskContext';
 import api from '../../../../services/api';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -60,6 +61,9 @@ export default function CreatePage({ open, handleClose }) {
   const { websiteController } = useContext(WebsiteContext);
   const [ currentWebsite ] = websiteController;
 
+  const { newPageAddController } = useContext(TaskContext);
+  const [ newPageAdd, setNewPageAdd ] = newPageAddController;
+
   const [name, setName] = useState('');
   const [url, setUrl] = useState('/');
   const [selectedElements, setSelectedElements] = useState([]);
@@ -77,21 +81,19 @@ export default function CreatePage({ open, handleClose }) {
   }
 
   const storePage = async () => {
-    console.log({
+    const response = await api.post('/pages/store.php', {
       name, url,
       website_id: Number(currentWebsite.id),
       elements_id: selectedElements.map(element => Number(element.id))
-    })
-    // const response = await api.post('/websites/store.php', {
-    //   designer_id: Number(designer.id),
-    //   name, url
-    // });
-    // const { data } = response;
-    // if(data.status === 'success') {
-    //   setCurrentWebsite(data.docs);
-    // } else {
-    //   alert('Error on load designers');
-    // }
+    });
+    const { data } = response;
+    if(data.status === 'success') {
+      if(!newPageAdd) {
+        setNewPageAdd(true);
+      }
+    } else {
+      alert('Error on create page');
+    }
   }
 
   useEffect(() => {

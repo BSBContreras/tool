@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { WebsiteContext } from '../../context/WebsiteContext';
-import api from '../../../../services/api';
+import { TaskContext } from '../../context/TaskContext';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -54,13 +53,18 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-export default function CreateWebsite({ open, handleClose }) {
+export default function CreateTask({ open, handleClose }) {
+  const { taskController } = useContext(TaskContext);
+  const [ currentTask, setCurrentTask ] = taskController;
+
   const [name, setName] = useState('');
-  const [details, setDetails] = useState('');
+  const [detail, setDetail] = useState('');
   const [errors, setErrors] = useState([]);
 
-  const preCreateTask = async () => {
-    // pre create task
+  const preCreateTask = () => {
+    setCurrentTask({
+      name, detail
+    })
   }
 
   const handleChageName = event => {
@@ -68,9 +72,9 @@ export default function CreateWebsite({ open, handleClose }) {
     value.length <= 100 && setName(value);
   }
 
-  const handleChangeDetails = event => {
+  const handleChangeDetail = event => {
     const { value } = event.target;
-    value.length <= 300 && setDetails(value);
+    value.length <= 300 && setDetail(value);
   }
 
   const validName = name => name.length >= 3 ? true : false;
@@ -89,7 +93,7 @@ export default function CreateWebsite({ open, handleClose }) {
       preCreateTask();
       handleClose();
       setName('');
-      setDetails('');
+      setDetail('');
     }
   }
 
@@ -101,11 +105,20 @@ export default function CreateWebsite({ open, handleClose }) {
       <DialogContent dividers>
         <Alert
           variant="filled"
-          severity="warning"
+          severity="info"
           style={{ marginBottom: 10 }}
         >
           This task will only be saved when at least one page is added, and clicking the "Save Task" button
         </Alert>
+        {(!currentTask.id && currentTask.name) && (
+          <Alert
+            variant="filled"
+            severity="warning"
+            style={{ marginBottom: 10 }}
+          >
+            The task "{currentTask.name}" has not yet been saved
+          </Alert>
+        )}
         <Collapse in={errors.length > 0}>
           <Alert 
             variant="filled"
@@ -125,13 +138,13 @@ export default function CreateWebsite({ open, handleClose }) {
         />
         <Typography style={{ marginTop: 10 }} gutterBottom> Task Detail </Typography>
         <TextField 
-          id="details" 
+          id="detail" 
           label="Details" 
           variant="outlined"
           multiline
-          value={details}
+          value={detail}
           fullWidth
-          onChange={handleChangeDetails}
+          onChange={handleChangeDetail}
         />
       </DialogContent>
       <DialogActions>
