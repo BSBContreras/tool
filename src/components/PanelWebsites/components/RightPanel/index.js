@@ -55,7 +55,7 @@ const TaskItemAvailble = ({ task }) => {
   const [currentTask, setCurrentTask] = taskController;
 
   return (
-    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' }}>
+    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)' }}>
       <ListItem button selected={currentTask === task} onClick={() => setCurrentTask(task)}>
         <Tooltip title="Add task in the constructor" arrow placement="top">
           <ListItemText 
@@ -114,19 +114,51 @@ const TaskList = ({ website }) => {
     }
   }, [newTaskAdd, website, setNewTaskAdd])
 
-  const unavailableTasks = []
+  const unavailableTasks = [
+    {
+      id: 50,
+      name: 'Task static 1',
+      detail: 'Static read-only task example 1'
+    },
+    {
+      id: 51,
+      name: 'Task static 2',
+      detail: 'Static read-only task example 2'
+    },
+    {
+      id: 52,
+      name: 'Task static 3',
+      detail: 'Static read-only task example 3'
+    },
+    {
+      id: 53,
+      name: 'Task static 4',
+      detail: 'Static read-only task example 4'
+    },
+  ]
 
   return (
-    <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
+    <List 
+      component="nav" 
+      style={{ padding: 10, height: 635, overflowY: 'auto'}}
+    >
+      <Typography variant="body1" align="center" style={{ color: '#777' }}>
+        TASK LIST
+      </Typography>
+      <Divider />
       <TaskAdd />
       {availableTasks.map(task => (
         <TaskItemAvailble key={task.id} task={task} />
       ))}
-      <Divider />
-      <Typography>Read-Only Region</Typography>
-      {unavailableTasks.map(task => (
-        <TaskItemUnavailable key={task.id} task={task} />
-      ))}
+      {unavailableTasks.length > 0 && (
+        <div>
+          <Divider />
+          <Typography>Read-Only Region</Typography>
+          {unavailableTasks.map(task => (
+            <TaskItemUnavailable key={task.id} task={task} />
+          ))}
+        </div>
+      )}
     </List>
   )
 }
@@ -168,7 +200,7 @@ const PageItem = ({ page }) => {
   }
 
   return (
-    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)' }}>
+    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #21CBF3 90%, #2196F3 30%)' }}>
       <ListItem button onClick={handleAddPage}>
         <Tooltip title="Add page in the constructor" arrow placement="top">
           <ListItemText 
@@ -182,6 +214,8 @@ const PageItem = ({ page }) => {
 }
 
 const PageList = ({ website }) => {
+  const Divider = () => <hr></hr>;
+
   const { newPageAddController } = useContext(TaskContext);
   const [ newPageAdd, setNewPageAdd ] = newPageAddController;
 
@@ -212,6 +246,10 @@ const PageList = ({ website }) => {
 
   return (
     <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
+      <Typography variant="body1" align="center" style={{ color: '#777' }}>
+        PAGE LIST
+      </Typography>
+      <Divider />
       <PageAdd />
       {pages.map(page => (
         <PageItem key={page.id} page={page} />
@@ -248,7 +286,7 @@ const RouteItem = ({ page, index }) => {
   }
 
   return (
-    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #FE6B8B 10%, #FF8E53 100%)' }}>
+    <Paper style={{ marginTop: 10, background: 'linear-gradient(45deg, #21CBF3 90%, #99FF99 30%)' }}>
       <ListItem button>
         <ListItemText 
           primary={<Typography style={{ color: 'white' }}>{page.name}</Typography>}
@@ -257,7 +295,7 @@ const RouteItem = ({ page, index }) => {
         <Tooltip title="Click to remove this page from task" arrow placement="top">
           <ListItemSecondaryAction onClick={handleRemove}>
             <IconButton edge="end">
-              <Delete style={{ color: '#933' }} />
+              <Delete style={{ color: '#FFF' }} />
             </IconButton>
           </ListItemSecondaryAction>
         </Tooltip>
@@ -343,64 +381,54 @@ const Constructor = () => {
 
   return (
     <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto' }}>
-      {currentTask.id ? (
+      <Typography variant="body1" align="center" style={{ color: '#777' }}>
+        CONSTRUCTOR
+      </Typography>
+      <Divider />
+      {currentTask.name ? (
         <div>
           <TaskHeader task={currentTask} />
           {selectedsPages.map((page, index) => (
             <RouteItem key={index} page={page} index={index} />
           ))}
-          <Button 
-            fullWidth
-            onClick={handleSaveTask}
-            disabled={selectedsPages.length === 0}
-            style={{ 
-              marginTop: 10, 
-              background: selectedsPages.length === 0 ? '#DDD' :'linear-gradient(45deg, #77EE77 30%, #99EE99 90%)', 
-              color: selectedsPages.length === 0 ? '#000' : '#333' 
-            }}>
+          {currentTask.id ? (
+            <Button 
+              fullWidth
+              onClick={handleSaveTask}
+              disabled={selectedsPages.length === 0}
+              style={{ 
+                marginTop: 10, 
+                background: selectedsPages.length === 0 ? '#DDD' :'linear-gradient(45deg, #77EE77 30%, #99EE99 90%)', 
+                color: selectedsPages.length === 0 ? '#000' : '#333' 
+              }}
+            >
               Save Task
             </Button>
-            {selectedsPages.length === 0 && (
-              <div>
-                <Divider />
-                <Typography align="center" style={{ color: '#999' }}>
-                  Select any page on the right to save this task
-                </Typography>
-              </div>
-            )}
-        </div>
-      ) : currentTask.name ? (
-        <div>
-          <TaskHeader task={currentTask} />
-          {selectedsPages.map((page, index) => (
-            <RouteItem key={index} page={page} index={index} />
-          ))}
-          <Button 
-            fullWidth
-            onClick={handleCreateTask}
-            disabled={selectedsPages.length === 0}
-            style={{ 
-              marginTop: 10, 
-              background: selectedsPages.length === 0 ? '#DDD' :'linear-gradient(45deg, #77EE77 30%, #99EE99 90%)', 
-              color: selectedsPages.length === 0 ? '#000' : '#333' 
-            }}>
+          ) : (
+            <Button 
+              fullWidth
+              onClick={handleCreateTask}
+              disabled={selectedsPages.length === 0}
+              style={{ 
+                marginTop: 10, 
+                background: selectedsPages.length === 0 ? '#DDD' :'linear-gradient(45deg, #77EE77 30%, #99EE99 90%)', 
+                color: selectedsPages.length === 0 ? '#000' : '#333'
+              }}
+            >
               Create Task
             </Button>
-            {selectedsPages.length === 0 && (
-              <div>
-                <Divider />
-                <Typography align="center" style={{ color: '#999' }}>
-                  Select any page on the right to create this task first time
-                </Typography>
-              </div>
-            )}
+          )}
+          {selectedsPages.length === 0 && (
+            <div>
+              <Divider />
+              <Typography align="center" style={{ color: '#999' }}>
+                Select any page on the right to save this task
+              </Typography>
+            </div>
+          )}
         </div>
       ) : (
         <div>
-          <Typography variant="body1" align="center" style={{ color: '#777' }}>
-            CONSTRUCTOR
-          </Typography>
-          <Divider />
           <Typography align="center" style={{ color: '#999' }}>
             Select any task on the left to edit your route
           </Typography>

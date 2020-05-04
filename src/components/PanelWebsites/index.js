@@ -8,10 +8,15 @@ import RightPanel from './components/RightPanel';
 
 export default function PanelTasks() {
   const useStyles = makeStyles(theme => ({
-    root: {
+    leftPanel: {
       height: 650,
       marginTop: 10,
-      margin: theme.spacing(1)
+      margin: theme.spacing(1),
+    },
+    rightPanel: {
+      height: 650,
+      marginTop: 10,
+      margin: theme.spacing(1),
     }
   }));
 
@@ -21,12 +26,12 @@ export default function PanelTasks() {
     <WebsiteProvider>
       <Grid container>
         <Grid item sm={3}>
-          <Paper className={classes.root}>
+          <Paper className={classes.leftPanel}>
             <WebsiteList />
           </Paper>
         </Grid>
         <Grid item sm={9}>
-          <Paper className={classes.root}>
+          <Paper className={classes.rightPanel}>
             <RightPanel />
           </Paper>
         </Grid>
