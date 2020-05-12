@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../../../../services/api';
+import { CreateAssessmentContext } from '../../context/CreateAssessmentContext';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Stepper from '@material-ui/core/Stepper';
@@ -7,14 +8,16 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CompletedStepsImage from '../../../../assets/completed_steps.png';
 
-const AssessmentDetails = ({ set, get }) => {
+const AssessmentDetails = () => {
   const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(2),
@@ -25,6 +28,8 @@ const AssessmentDetails = ({ set, get }) => {
     }
   }));
 
+  const { detailsController } = useContext(CreateAssessmentContext);
+  const [ get, set ] = detailsController;
   const { name, detail } = get;
 
   const handleName = e => {
@@ -66,6 +71,349 @@ const AssessmentDetails = ({ set, get }) => {
       />
     </div>
   )
+}
+
+const ChooseQuestionnaire = () => {
+
+  return (
+    <Grid container >
+      <Grid item sm={4}>
+        <ListQuestionnaires />
+      </Grid>
+      <Grid item sm={8}>
+        <ListQuestions />
+      </Grid>
+    </Grid>
+  )
+}
+
+const ListQuestionnaires = () => {
+  const Divider = () => <hr></hr>
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      height: 350,
+      overflowY: 'auto',
+      padding: 10, 
+    },
+    header: {
+      color: '#777'
+    },
+    paper: {
+      background: 'linear-gradient(45deg, #21CBF3 90%, #2196F3 30%)',
+      marginTop: 10
+    },
+    name: {
+      color: '#FFF' 
+    },
+    url: {
+      color: '#FFF' 
+    }
+  }))
+
+  const { questionnaireController } = useContext(CreateAssessmentContext);
+  const [ selectedQuestionnaire, setSelectedQuestionnaire ] = questionnaireController;
+
+  const [questionnaires, setQuestionnaires] = useState([]);
+
+  const loadQuestionnaires = async () => {
+		const response = await api.post('questionnaires/index.php');
+		response.data.status === 'success'
+			?	setQuestionnaires(response.data.docs)
+      :	alert('Error loading questionnaires')
+  }
+
+  const handleSelectQuestionnaire = (questionnaire) => {
+    if(selectedQuestionnaire !== questionnaire) {
+      setSelectedQuestionnaire(questionnaire)
+    }
+  }
+  
+  useEffect(() => {
+    loadQuestionnaires();
+  }, []);
+
+  const classes = useStyles();
+
+  return (
+    <List className={classes.root} component="nav">
+      <Typography variant="body1" align="center" className={classes.header}>
+        QUESTIONNAIRE LIST
+      </Typography>
+      <Divider />
+      {questionnaires.map(questionnaire => (
+        <Paper key={questionnaire.id} className={classes.paper}>
+          <Tooltip title={questionnaire.detail || 'No details'} arrow placement="top">
+            <ListItem button onClick={() => handleSelectQuestionnaire(questionnaire)}>
+              <ListItemText 
+                primary={<Typography className={classes.name}>{questionnaire.name}</Typography>}
+                secondary={<Typography className={classes.detail} noWrap>{questionnaire.detail}</Typography>}
+              />
+            </ListItem>
+          </Tooltip>
+        </Paper>
+      ))}
+    </List>
+  )
+}
+
+const ListQuestions = () => {
+  const Divider = () => <hr></hr>
+
+  const useStyles = makeStyles((theme) => ({
+    root: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      height: 350,
+      overflowY: 'auto',
+      padding: 10, 
+    },
+    header: {
+      color: '#777'
+    },
+    paper: {
+      background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
+      margin: theme.spacing(1)
+    },
+    criterion: {
+      color: '#FFF' 
+    },
+    text: {
+      color: '#DDD' 
+    }
+  }));
+
+  const { questionnaireController } = useContext(CreateAssessmentContext);
+  const [ questionnaire ] = questionnaireController;
+
+  const [questions, setQuestions] = useState([]);
+
+  const loadQuestions = async (id) => {
+		const response = await api.post('questionnaires/questions.php', { id: Number(id) });
+		response.data.status === 'success'
+			?	setQuestions(response.data.docs)
+      :	alert('Error loading questions')
+	}
+
+  useEffect(() => {
+    if(questionnaire.id) {
+      loadQuestions(questionnaire.id);
+    }
+  }, [questionnaire]);
+
+  const classes = useStyles();
+
+  return (
+    <List className={classes.root} component="nav">
+      <Typography variant="body1" align="center" className={classes.header}>
+        QUESTION LIST
+      </Typography>
+      <Divider />
+      <Grid container>
+        {questions.map(question => (
+          <Grid key={question.id} item sm={6}>
+            <Paper className={classes.paper}>
+              <Tooltip title={question.text || 'No details'} arrow placement="top">
+                <ListItem>
+                  <ListItemText 
+                    primary={<Typography className={classes.criterion}>{question.criterion}</Typography>}
+                    secondary={<Typography className={classes.text} variant="subtitle2" noWrap>{question.text}</Typography>}
+                  />
+                </ListItem>
+              </Tooltip>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+    </List>
+  )
+}
+
+const ChooseTasks = () => {
+
+  const [website, setWebsite] = useState({});
+
+  return (
+    <Grid container>
+      <Grid item sm={4}>
+        <WebsiteList setWebsite={setWebsite} />
+      </Grid>
+      <Grid item sm={8}>
+        <TaskList website={website} />
+      </Grid>
+    </Grid>
+  )
+}
+
+const WebsiteList = ({ setWebsite }) => {
+  const Divider = () => <hr></hr>
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      height: 350,
+      overflowY: 'auto',
+      padding: 10, 
+    },
+    header: {
+      color: '#777'
+    },
+    paper: {
+      background: 'linear-gradient(45deg, #21CBF3 90%, #2196F3 30%)',
+      marginTop: 10
+    },
+    name: {
+      color: '#FFF' 
+    },
+    url: {
+      color: '#FFF' 
+    }
+  }))
+
+  const [websites, setWebsites] = useState([]);
+
+  const loadWebsites = async () => {
+    const response = await api.post('/websites/index.php');
+    const { data } = response;
+    if(data.status === 'success') {
+      setWebsites(data.docs);
+    } else {
+      alert('Error on load websites');
+    }
+  }
+
+  const handleSelectWebsite = website => setWebsite(website)
+
+  useEffect(() => {
+    loadWebsites();
+  }, []);
+
+  const classes = useStyles();
+
+  return (
+    <List className={classes.root} component="nav">
+      <Typography variant="body1" align="center" className={classes.header}>
+        WEBSITE LIST
+      </Typography>
+      <Divider />
+      {websites.map(website => (
+        <Paper key={website.id} className={classes.paper}>
+          <Tooltip title={website.url} arrow placement="top">
+            <ListItem button onClick={() => handleSelectWebsite(website)}>
+              <ListItemText 
+                primary={<Typography className={classes.name}>{website.name}</Typography>}
+                secondary={<Typography className={classes.url} noWrap>{website.url}</Typography>}
+              />
+            </ListItem>
+          </Tooltip>
+        </Paper>
+      ))}
+    </List>
+  )
+}
+
+const TaskItem = ({ task }) => {
+  const { tasksController } = useContext(CreateAssessmentContext);
+  const [ tasks, setTasks ] = tasksController;
+
+  const [selected, setSelected] = useState(false);
+
+  const useStyles = makeStyles(theme => ({
+    paper: {
+      background: 
+        selected 
+          ? 'linear-gradient(45deg, #2196F3 90%, #99FF99 30%)'
+          : 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
+      margin: theme.spacing(1)
+    },
+    name: {
+      color: '#FFF' 
+    },
+    detail: {
+      color: '#FFF' 
+    }
+  }))
+
+  const handleClickTask = () => {
+    if(selected) {
+      setTasks(tasks.filter(selectedTask => selectedTask.id !== task.id ))
+      setSelected(false);
+    } else {
+      setTasks([...tasks, task])
+      setSelected(true);
+    }
+  }
+
+  const classes = useStyles();
+
+  return (
+    <Grid item sm={6}>
+      <Paper className={classes.paper}>
+        <Tooltip title={task.detail || 'No details'} arrow placement="top">
+          <ListItem button onClick={handleClickTask}>
+            <ListItemText 
+              primary={<Typography className={classes.name}>{task.name}</Typography>}
+              secondary={<Typography className={classes.detail} noWrap>{task.detail}</Typography>}
+            />
+          </ListItem>
+        </Tooltip>
+      </Paper>
+    </Grid>
+  )
+}
+
+const TaskList = ({ website }) => {
+  const Divider = () => <hr></hr>
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      height: 350,
+      overflowY: 'auto',
+      padding: 10, 
+    },
+    header: {
+      color: '#777'
+    }
+  }))
+
+  const [tasks, setTasks] = useState([]);
+
+  const loadTasks = async (id) => {
+    const response = await api.post('/websites/tasks.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setTasks(data.docs);
+    } else {
+      alert('Error on load tasks');
+    }
+  }
+
+  useEffect(() => {
+    if(website.id) {
+      loadTasks(website.id)
+    }
+  }, [website])
+
+  const classes = useStyles();
+    
+  return (
+    <List className={classes.root} component="nav">
+      <Typography variant="body1" align="center" className={classes.header}>
+        TASK LIST
+      </Typography>
+      <Divider />
+      <Grid container>
+        {tasks.map(task => (
+          <TaskItem key={task.id} task={task} />
+        ))}
+      </Grid>
+    </List>
+    )
 }
 
 const ChooseGroups = () => {
@@ -180,309 +528,6 @@ const ChooseGroups = () => {
   );
 }
 
-const ChooseQuestionnaire = ({ get, set }) => {
-  const useStyles = makeStyles(theme => ({
-    root: {
-      display: 'flex',
-      alignItems: 'space-between',
-      justifyContent: 'center',
-    },
-    item: {
-      margin: theme.spacing(2),
-      width: '100%'
-    }
-  }));
-
-  const classes = useStyles();
-
-  return (
-    <div className={classes.root}>
-      <div className={classes.item}>
-        <ListQuestionnaires set={set} />
-      </div>
-      <div className={classes.item}>
-        <ListQuestions questionnaire={get} />
-      </div>
-    </div>
-  )
-}
-
-const ListQuestionnaires = ({ set }) => {
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      width: '100%',
-      maxWidth: 500,
-      height: 350,
-      overflowY: 'auto'
-    }
-  }));
-
-  useEffect(() => {
-    loadQuestionnaires();
-  }, []);
-
-  const [questionnaires, setQuestionnaires] = useState([]);
-
-  const loadQuestionnaires = async () => {
-		const response = await api.post('questionnaires/index.php');
-		response.data.status === 'success'
-			?	setQuestionnaires(response.data.docs)
-      :	alert('Error loading questionnaires')
-	}
-
-  const classes = useStyles();
-
-  return (
-  <List
-    component="nav"
-    subheader={
-      <ListSubheader component="div">
-        Questionnaires
-      </ListSubheader>
-    }
-    className={classes.root}
-  >
-    {questionnaires.map(questionnaire => (
-      <ListItem key={questionnaire.id} button onClick={() => set(questionnaire)}>
-        <ListItemText 
-          primary={questionnaire.name}
-          secondary={questionnaire.detail}
-        />
-      </ListItem>
-    ))}
-  </List>
-  )
-}
-
-const ListQuestions = ({ questionnaire }) => {
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      width: '100%',
-      maxWidth: 500,
-      height: 350,
-      overflowY: 'auto'
-    }
-  }));
-
-  useEffect(() => {
-    if(questionnaire.id) {
-      loadQuestions(questionnaire.id);
-    }
-  }, [questionnaire]);
-
-  const [questions, setQuestions] = useState([]);
-
-  const loadQuestions = async (id) => {
-		const response = await api.post('questionnaires/questions.php', { id: Number(id) });
-		response.data.status === 'success'
-			?	setQuestions(response.data.docs)
-      :	alert('Error loading questions')
-	}
-
-  const classes = useStyles();
-
-  return (
-  <List
-    component="nav"
-    subheader={
-      <ListSubheader component="div">
-        {questionnaire.name || 'Questions'}
-      </ListSubheader>
-    }
-    className={classes.root}
-  >
-    {questions.map(question => (
-      <ListItem key={question.id} button>
-        <ListItemText 
-          primary={question.text}
-          secondary={question.criterion}
-        />
-      </ListItem>
-    ))}
-  </List>
-  )
-}
-
-const ChooseTasks = ({ get, set }) => {
-  const useStyles = makeStyles(theme => ({
-    root: {
-      display: 'flex',
-      alignItems: 'space-between',
-      justifyContent: 'center',
-    },
-    item: {
-      margin: theme.spacing(2),
-      width: '100%'
-    }
-  }));
-
-  const [website, setWebSite] = useState({});
-
-  const classes = useStyles();
-
-  return (
-    <div className={classes.root}>
-      <div className={classes.item}>
-        <ListWebSites set={setWebSite} />
-      </div>
-      <div className={classes.item}>
-        <ListTasks website={website} set={set} get={get} />
-      </div>
-    </div>
-  )
-}
-
-const ListWebSites = ({ set }) => {
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      width: '100%',
-      maxWidth: 500,
-      height: 350,
-      overflowY: 'auto'
-    }
-  }));
-
-  useEffect(() => {
-    loadWebsites();
-  }, []);
-
-  const [websites, setWebsites] = useState([]);
-
-  // const loadWebsites = async () => {
-	// 	const response = await api.post('websites/index.php');
-	// 	response.data.status === 'success'
-	// 		?	setWebsites(response.data.docs)
-  //     :	alert('Error loading websites')
-  // }
-  
-  const loadWebsites = async () => {
-    setWebsites([
-      {
-        id: 1,
-        name: 'website 1',
-        url: 'http://www.websitedefault.com'
-      },
-      {
-        id: 2,
-        name: 'website 2',
-        url: 'http://www.websitedefault.com'
-      },
-      {
-        id: 3,
-        name: 'website 3',
-        url: 'http://www.websitedefault.com'
-      },
-    ])
-  }
-
-  const classes = useStyles();
-
-  return (
-  <List
-    component="nav"
-    subheader={
-      <ListSubheader component="div">
-        WebSites
-      </ListSubheader>
-    }
-    className={classes.root}
-  >
-    {websites.map(website => (
-      <ListItem key={website.id} button onClick={() => set(website)}>
-        <ListItemText 
-          primary={website.name}
-          secondary={website.url}
-        />
-      </ListItem>
-    ))}
-  </List>
-  )
-}
-
-const ListTasks = ({ website, set, get }) => {
-  const useStyles = makeStyles((theme) => ({
-    root: {
-      width: '100%',
-      maxWidth: 500,
-      height: 350,
-      overflowY: 'auto'
-    }
-  }));
-
-  useEffect(() => {
-    if(website.id) {
-      loadTasks(website.id);
-    }
-  }, [website]);
-
-  const [tasks, setTasks] = useState([]);
-
-  // const loadTasks = async (id) => {
-	// 	const response = await api.post('websites/tasks.php', { id: Number(id) });
-	// 	response.data.status === 'success'
-	// 		?	setTasks(response.data.docs)
-  //     :	alert('Error loading tasks')
-  // }
-  
-  const loadTasks = async (id) => {
-    setTasks([
-      {
-        id: 1,
-        name: 'task 1',
-        detail: 'task 1 details'
-      },
-      {
-        id: 2,
-        name: 'task 2',
-        detail: 'task 2 details'
-      },
-      {
-        id: 3,
-        name: 'task 3',
-        detail: 'task 3 details'
-      },
-    ])
-  }
-  
-  const handleTask = task => {
-    const index = get.indexOf(task)
-    if(index === -1) {
-      set([...get, task]);
-    } else {
-      get.splice(index, 1);
-      set([...get]);
-    }
-  }
-
-  const classes = useStyles();
-
-  return (
-  <List
-    component="nav"
-    subheader={
-      <ListSubheader component="div">
-        {website.name || 'Tasks'}
-      </ListSubheader>
-    }
-    className={classes.root}
-  >
-    {tasks.map(task => (
-      <ListItem 
-        button
-        key={task.id}
-        selected={get.map(task => task.id).includes(task.id)}
-        onClick={() => handleTask(task)}
-      >
-        <ListItemText 
-          primary={task.name}
-          secondary={task.detail}
-        />
-      </ListItem>
-    ))}
-  </List>
-  )
-}
-
 export default function StepperView() {
   const useStyles = makeStyles(theme => ({
     root: {
@@ -518,25 +563,26 @@ export default function StepperView() {
       justifyContent: 'center',
     }
   }));
-
+  
   const getSteps = () => {
     return [
       'Enter name and details about your assessment', 
-      'Choose a questionnaire', 
       'Choose the tasks to be evaluated',
+      'Choose a questionnaire', 
       'Choose groups'
     ];
   }
 
-  const [questionnaire, setQuestionnaire] = useState({});
-  const [details, setDetails] = useState({ name: '', detail: '' });
-  const [tasks, setTasks] = useState([]);
+  const controller = useContext(CreateAssessmentContext);
+  const [ details ] = controller.detailsController;
+  const [ tasks ] = controller.tasksController;
+  const [ questionnaire ] = controller.questionnaireController
 
   const conditions = [
     details.name.length > 5,
+    tasks.length > 0,
     questionnaire.id !== undefined,
-    tasks.length !== 0,
-    true,
+    true
   ]
 
   const completeStep = step => conditions[step];
@@ -544,11 +590,11 @@ export default function StepperView() {
   const getStepContent = (stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <AssessmentDetails set={setDetails} get={details} />;
+        return <AssessmentDetails />;
       case 1:
-        return <ChooseQuestionnaire set={setQuestionnaire} get={questionnaire} />;
+        return <ChooseTasks />;
       case 2:
-        return <ChooseTasks set={setTasks} get={tasks} />;
+        return <ChooseQuestionnaire />;
       case 3:
         return <ChooseGroups />;
       default:
@@ -580,67 +626,67 @@ export default function StepperView() {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map(label => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <div>
-        {activeStep === steps.length ? (
-          <div>
-            <div className={classes.finalContainer}>
-              <img 
-                className={classes.image}
-                src={CompletedStepsImage} 
-                width="500" 
-                heigth="300" 
-                alt="All steps have been completed!" 
-              />
-              <Typography 
-                className={classes.finalText} 
-                variant="h5"
-              >
-                All steps have been completed!
-              </Typography>
+      <div className={classes.root}>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map(label => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <div>
+          {activeStep === steps.length ? (
+            <div>
+              <div className={classes.finalContainer}>
+                <img 
+                  className={classes.image}
+                  src={CompletedStepsImage} 
+                  width="500" 
+                  heigth="300" 
+                  alt="All steps have been completed!" 
+                />
+                <Typography 
+                  className={classes.finalText} 
+                  variant="h5"
+                >
+                  All steps have been completed!
+                </Typography>
+              </div>
+              <div className={classes.buttons}>
+                <Button onClick={handleReset}>Create another Assessment</Button>
+              </div>
             </div>
-            <div className={classes.buttons}>
-              <Button onClick={handleReset}>Create another Assessment</Button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div className={classes.instructions}>
-              {getStepContent(activeStep)}
-            </div>
-            <div className={classes.buttons}>
-              <Button
-                disabled={activeStep === 0}
-                color="primary"
-                onClick={handleBack}
-                className={classes.backButton}
-              >
-                Back
-              </Button>
-              {activeStep < steps.length - 1 ? (
+          ) : (
+            <div>
+              <div className={classes.instructions}>
+                {getStepContent(activeStep)}
+              </div>
+              <div className={classes.buttons}>
                 <Button
-                  disabled={!completeStep(activeStep)}
-                  variant="contained" 
-                  color="secondary"
-                  onClick={handleNext}>
-                  Next
+                  disabled={activeStep === 0}
+                  color="primary"
+                  onClick={handleBack}
+                  className={classes.backButton}
+                >
+                  Back
                 </Button>
-              ) : (
-                <Button variant="contained" color="secondary" onClick={handleFinish}>
-                  Finish
-                </Button>
-              )}
+                {activeStep < steps.length - 1 ? (
+                  <Button
+                    disabled={!completeStep(activeStep)}
+                    variant="contained" 
+                    color="secondary"
+                    onClick={handleNext}>
+                    Next
+                  </Button>
+                ) : (
+                  <Button variant="contained" color="secondary" onClick={handleFinish}>
+                    Finish
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
   );
 }

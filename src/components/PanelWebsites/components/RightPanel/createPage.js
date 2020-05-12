@@ -171,7 +171,9 @@ export default function CreatePage({ open, handleClose }) {
           fullWidth
           onChange={handleChageName}
         />
-        <Typography style={{ marginTop: 10 }} gutterBottom> Page address </Typography>
+        <Typography style={{ marginTop: 10 }} gutterBottom> 
+          Page address {url[0] === '/' && `"${currentWebsite.url}${url}"`} 
+        </Typography>
         <TextField 
           id="url" 
           label="ex: /home" 

@@ -10,11 +10,16 @@ const theme = createMuiTheme({
   palette: {
     primary: blue,
     secondary: indigo
+  },
+  typography: {
+    fontFamily: [
+      'Roboto',
+    ]
   }
 });
 
 export default function App() {
-  const [page, setPage] = useState('websites');
+  const [page, setPage] = useState('assessments');
 
   return (
     <MuiThemeProvider theme={theme}>
