@@ -8,13 +8,18 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip'
 import Grid from '@material-ui/core/Grid'
 import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import CancelIcon from '@material-ui/icons/Cancel';
+import AddIcon from '@material-ui/icons/AddCircle';
 import CompletedStepsImage from '../../../../assets/completed_steps.png';
 
 const AssessmentDetails = () => {
@@ -417,115 +422,196 @@ const TaskList = ({ website }) => {
 }
 
 const ChooseGroups = () => {
+  const Divider = () => <hr></hr>
+
   const useStyles = makeStyles((theme) => ({
     root: {
       width: '80%',
-      '& > * + *': {
-        marginTop: theme.spacing(3),
-      },
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      height: 350,
+      overflowY: 'auto',
+      padding: 10, 
     },
+    paper: {
+      background: 'linear-gradient(45deg, #2196F3 90%, #99FF99 30%)',
+      margin: theme.spacing(1)
+    },
+    chip: {
+      marginTop: theme.spacing(1), 
+      marginRight: theme.spacing(1) 
+    },
+    chipAdd: {
+      marginTop: theme.spacing(1), 
+      marginRight: theme.spacing(1) ,
+      background: '#99FF99'
+    },
+    header: {
+      color: '#777'
+    },
+    icon: {
+      color: '#FFF'
+    },
+    name: {
+      color: '#FFF' 
+    },
+    detail: {
+      color: '#FFF' 
+    }
   }));
 
-  const profiles = [
-    { name: 'The Shawshank Redemption', year: 1994 },
-    { name: 'The Godfather', year: 1972 },
-    { name: 'The Godfather: Part II', year: 1974 },
-    { name: 'The Dark Knight', year: 2008 },
-    { name: '12 Angry Men', year: 1957 },
-    { name: "Schindler's List", year: 1993 },
-    { name: 'Pulp Fiction', year: 1994 },
-    { name: 'The Lord of the Rings: The Return of the King', year: 2003 },
-    { name: 'The Good, the Bad and the Ugly', year: 1966 },
-    { name: 'Fight Club', year: 1999 },
-    { name: 'The Lord of the Rings: The Fellowship of the Ring', year: 2001 },
-    { name: 'Star Wars: Episode V - The Empire Strikes Back', year: 1980 },
-    { name: 'Forrest Gump', year: 1994 },
-    { name: 'Inception', year: 2010 },
-    { name: 'The Lord of the Rings: The Two Towers', year: 2002 },
-    { name: "One Flew Over the Cuckoo's Nest", year: 1975 },
-    { name: 'Goodfellas', year: 1990 },
-    { name: 'The Matrix', year: 1999 },
-    { name: 'Seven Samurai', year: 1954 },
-    { name: 'Star Wars: Episode IV - A New Hope', year: 1977 },
-    { name: 'City of God', year: 2002 },
-    { name: 'Se7en', year: 1995 },
-    { name: 'The Silence of the Lambs', year: 1991 },
-    { name: "It's a Wonderful Life", year: 1946 },
-    { name: 'Life Is Beautiful', year: 1997 },
-    { name: 'The Usual Suspects', year: 1995 },
-    { name: 'Léon: The Professional', year: 1994 },
-    { name: 'Spirited Away', year: 2001 },
-    { name: 'Saving Private Ryan', year: 1998 },
-    { name: 'Once Upon a Time in the West', year: 1968 },
-    { name: 'American History X', year: 1998 },
-    { name: 'Interstellar', year: 2014 },
-    { name: 'Casablanca', year: 1942 },
-    { name: 'City Lights', year: 1931 },
-    { name: 'Psycho', year: 1960 },
-    { name: 'The Green Mile', year: 1999 },
-    { name: 'The Intouchables', year: 2011 },
-    { name: 'Modern Times', year: 1936 },
-    { name: 'Raiders of the Lost Ark', year: 1981 },
-    { name: 'Rear Window', year: 1954 },
-    { name: 'The Pianist', year: 2002 },
-    { name: 'The Departed', year: 2006 },
-    { name: 'Terminator 2: Judgment Day', year: 1991 },
-    { name: 'Back to the Future', year: 1985 },
-    { name: 'Whiplash', year: 2014 },
-    { name: 'Gladiator', year: 2000 },
-    { name: 'Memento', year: 2000 },
-    { name: 'The Prestige', year: 2006 },
-    { name: 'The Lion King', year: 1994 },
-    { name: 'Apocalypse Now', year: 1979 },
-    { name: 'Alien', year: 1979 },
-    { name: 'Sunset Boulevard', year: 1950 },
-    { name: 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb', year: 1964 },
-    { name: 'The Great Dictator', year: 1940 },
-    { name: 'Cinema Paradiso', year: 1988 },
-    { name: 'The Lives of Others', year: 2006 },
-    { name: 'Grave of the Fireflies', year: 1988 },
-    { name: 'Paths of Glory', year: 1957 },
-    { name: 'Django Unchained', year: 2012 },
-  ];
+  const { userListController } = useContext(CreateAssessmentContext);
+  const [selectedProfiles, setSelectedProfiles] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+  const [userList, setUserList] = userListController;
 
-  const [value, setValue] = useState([]);
-
-  const handleChange = (event, newValue, reason) => {
-    if(reason === 'select-option') {
-      // opcao selecionada
+  const loadProfiles = async () => {
+    const response = await api.post('/profiles/index.php');
+    const { data } = response;
+    if(data.status === 'success') {
+      setProfiles(data.docs);
+    } else {
+      alert('Error on load profiles');
     }
-    if(reason === 'remove-option') {
-      // opcao removida
-    }
-    if(reason === 'clear') {
-      // todas selecoes foram apagadas
-    }
-    setValue(newValue);
   }
+
+  const union = (oldUsers, newUsers, newProfile_id) => {
+    if(oldUsers.length === 0) {
+      return newUsers.map(user => ({...user, profile_ids: [newProfile_id], count: 1}))
+    }
+
+    if(newUsers.length === 0) {
+      return oldUsers;
+    }
+
+    const oldUsersIds = oldUsers.map(user => user.id);
+    const newUsersIds = newUsers.map(user => user.id);
+
+    const A = oldUsers.filter(user => !newUsersIds.includes(user.id));
+    const B = newUsers.filter(user => !oldUsersIds.includes(user.id));
+    const AB = oldUsers.filter(user => newUsersIds.includes(user.id));
+
+    return [
+      ...A, 
+      ...B.map(user => ({...user, profile_ids: [newProfile_id], count: 1})),
+      ...AB.map(user => ({...user, profile_ids: [...user.profile_ids, newProfile_id], count: user.count + 1}))
+    ]
+  }
+
+  const loadUsers = async (id) => {
+    const response = await api.post('/profiles/evaluators.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      const newUsers = data.docs;
+      setUserList(union(userList, newUsers, id));
+    } else {
+      alert('Error on load evaluators');
+    }
+  }
+
+  const updateUsers = (id) => {
+    setUserList(userList.map(user => {
+      if(!user.profile_ids.includes(id)) {
+        return user;
+      } else {
+        return {...user, count: user.count - 1};
+      }
+    }).filter(user => user.count > 0));
+  }
+
+  useEffect(() => {
+    loadProfiles();
+  }, []);
+
+  const handleSelectetProfile = (newProfile) => {
+    if(!newProfile) return;
+    loadUsers(newProfile.id);
+    setSelectedProfiles([...selectedProfiles, newProfile]);
+    setProfiles(profiles.filter(profile => profile.id !== newProfile.id));
+  }
+
+  const handleRemoveProfile = (oldProfile) => {
+    updateUsers(oldProfile.id);
+    setSelectedProfiles(selectedProfiles.filter(profile => profile.id !== oldProfile.id));
+    setProfiles([...profiles, oldProfile]);
+  } 
+
+  const handleRemoveUser = (oldUser) => {
+    setUserList(userList.filter(user => user.id !== oldUser.id));
+  }
+
+  console.log(userList);
 
   const classes = useStyles();
 
   return (
     <div className={classes.root}>
       <Autocomplete
-        multiple
-        value={value}
         autoHighlight
-        id="group-selector"
+        clearOnEscape
         options={profiles}
         getOptionLabel={profile => profile.name}
-        onChange={handleChange}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="standard"
-            label="Groups"
-            placeholder="Choose any group"
-          />
-        )}
+        onChange={(event, newValue) => handleSelectetProfile(newValue)}
+        renderInput={(params) => <TextField {...params} label="profile name" variant="outlined" />}
       />
+      {selectedProfiles.length > 0 && (
+        <List component="nav">
+          <Typography variant="body1" align="center" className={classes.header}>
+            SELECTED PROFILES
+          </Typography>
+          <Divider />
+          <Grid container>
+            {selectedProfiles.map(profile => (
+              <Grid key={profile.id} item sm={4}>
+                <Paper className={classes.paper}>
+                  <Tooltip title={profile.detail || 'No details'} arrow placement="top">
+                    <ListItem>
+                      <ListItemText 
+                        primary={<Typography className={classes.name}>{profile.name}</Typography>}
+                        secondary={<Typography className={classes.detail} noWrap>{profile.detail}</Typography>}
+                      />
+                      <ListItemSecondaryAction onClick={() => handleRemoveProfile(profile)}>
+                        <IconButton edge="end">
+                          <CancelIcon className={classes.icon} />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  </Tooltip>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </List>
+      )}
+      <List component="nav">
+        <Typography variant="body1" align="center" className={classes.header}>
+          EVALUATORS LIST
+        </Typography>
+        <Divider />
+        <Chip
+          className={classes.chipAdd}
+          onClick={() => alert('Add')}
+          label="Add user"
+          icon={<AddIcon />}
+        />
+        {userList.map(user => (
+          <Chip
+            key={user.id}
+            color="primary"
+            className={classes.chip}
+            label={user.email}
+            onDelete={() => handleRemoveUser(user)}
+          />
+        ))}
+      </List>
     </div>
   );
+}
+
+const Confimation = () => {
+  return (
+    <div>Confimation</div>
+  )
 }
 
 export default function StepperView() {
@@ -569,7 +655,8 @@ export default function StepperView() {
       'Enter name and details about your assessment', 
       'Choose the tasks to be evaluated',
       'Choose a questionnaire', 
-      'Choose groups'
+      'Choose evaluators',
+      'Confimation'
     ];
   }
 
@@ -577,13 +664,16 @@ export default function StepperView() {
   const [ details ] = controller.detailsController;
   const [ tasks ] = controller.tasksController;
   const [ questionnaire ] = controller.questionnaireController
+  const [ evaluators ] = controller.userListController;
 
-  const conditions = [
-    details.name.length > 5,
-    tasks.length > 0,
-    questionnaire.id !== undefined,
-    true
-  ]
+  // const conditions = [
+  //   details.name.length > 5,
+  //   tasks.length > 0,
+  //   questionnaire.id !== undefined,
+  //   evaluators.length > 0
+  // ]
+
+  const conditions = [ true, true, true, true ];
 
   const completeStep = step => conditions[step];
 
@@ -597,6 +687,8 @@ export default function StepperView() {
         return <ChooseQuestionnaire />;
       case 3:
         return <ChooseGroups />;
+      case 4:
+        return <Confimation />
       default:
         return 'Unknown stepIndex';
     }

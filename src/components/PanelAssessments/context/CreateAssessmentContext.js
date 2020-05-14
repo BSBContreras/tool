@@ -7,11 +7,13 @@ export default function CreateAssessmentProvider({ children }) {
   const detailsController = useState({ name: '', detail: '' });
   const questionnaireController = useState({});
   const tasksController = useState([]);
+  const userListController = useState([]);
 
   const state = {
     detailsController,
     questionnaireController,
-    tasksController
+    tasksController,
+    userListController
   }
 
   return (
