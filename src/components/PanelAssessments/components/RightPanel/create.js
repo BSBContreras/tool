@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../../../../services/api';
 import { CreateAssessmentContext } from '../../context/CreateAssessmentContext';
+import { AssessmentContext } from '../../context/AssessmentContext';
+import CompletedStepsSvg from '../../../../assets/completed_steps.svg';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Stepper from '@material-ui/core/Stepper';
@@ -18,9 +20,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import MuiAlert from '@material-ui/lab/Alert';
 import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/AddCircle';
-import CompletedStepsImage from '../../../../assets/completed_steps.png';
+import Snackbar from '@material-ui/core/Snackbar';
 
 const AssessmentDetails = () => {
   const useStyles = makeStyles(theme => ({
@@ -540,8 +543,6 @@ const ChooseGroups = () => {
     setUserList(userList.filter(user => user.id !== oldUser.id));
   }
 
-  console.log(userList);
-
   const classes = useStyles();
 
   return (
@@ -609,8 +610,112 @@ const ChooseGroups = () => {
 }
 
 const Confimation = () => {
+  const Divider = () => <hr></hr>;
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(2),
+      width: '100%',
+      height: 350,
+      overflowY: 'auto',
+      padding: 10,
+    },
+    paper: {
+      background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
+      margin: theme.spacing(1)
+    },
+    header: {
+      color: '#777'
+    },
+    value: {
+      color: '#333'
+    },
+    name: {
+      color: '#FFF' 
+    },
+    detail: {
+      color: '#DDD' 
+    }
+  }))
+
+  const controller = useContext(CreateAssessmentContext);
+  const [ details ] = controller.detailsController;
+  const [ tasks ] = controller.tasksController;
+  const [ questionnaire ] = controller.questionnaireController
+  const [ evaluators ] = controller.userListController;
+
+  const classes = useStyles();
+
   return (
-    <div>Confimation</div>
+    <div className={classes.root}>
+      <Typography variant="body1" align="center" className={classes.header}>
+          INFORMATIONS
+        </Typography>
+      <Typography className={classes.value} variant="body1" component="p">
+        Name: {details.name}
+      </Typography>
+      <Typography className={classes.value} variant="subtitle1" component="p">
+        Details: {details.detail}
+      </Typography>
+      <Divider />
+      <Typography variant="body1" align="center" className={classes.header}>
+        QUESTIONNAIRE
+      </Typography>
+      <Typography className={classes.value} variant="body1" component="p">
+        Name: {questionnaire.name}
+      </Typography>
+      <Typography className={classes.value} variant="subtitle1" component="p">
+        Details: {questionnaire.detail}
+      </Typography>
+      <Typography className={classes.value} variant="body2" component="p">
+        Number of questions : {questionnaire.questions}
+      </Typography>
+      <Divider />
+      <List component="nav">
+        <Typography variant="body1" align="center" className={classes.header}>
+          TASKS
+        </Typography>
+        <Grid container>
+          {tasks.map(task => (
+            <Grid key={task.id} item sm={4}>
+              <Paper className={classes.paper}>
+                <Tooltip title={task.detail || 'No details'} arrow placement="top">
+                  <ListItem>
+                    <ListItemText 
+                      primary={<Typography className={classes.name}>{task.name}</Typography>}
+                      secondary={<Typography className={classes.detail} variant="subtitle2" noWrap>{task.detail}</Typography>}
+                    />
+                  </ListItem>
+                </Tooltip>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      </List>
+      <Divider />
+      <List component="nav">
+        <Typography variant="body1" align="center" className={classes.header}>
+          EVALUATORS
+        </Typography>
+        <Grid container>
+          {evaluators.map(evaluator => (
+            <Grid key={evaluator.id} item sm={4}>
+              <Paper className={classes.paper}>
+                <Tooltip title={evaluator.email || 'No details'} arrow placement="top">
+                  <ListItem>
+                    <ListItemText 
+                      primary={<Typography className={classes.name}>{evaluator.name}</Typography>}
+                      secondary={<Typography className={classes.detail} variant="subtitle2" noWrap>{evaluator.email}</Typography>}
+                    />
+                  </ListItem>
+                </Tooltip>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      </List>
+    </div>
   )
 }
 
@@ -639,9 +744,10 @@ export default function StepperView() {
       height: 350,
     },
     image: {
-      display: 'block',
-      marginLeft: 'auto',
-      marginRight: 'auto'
+      display: 'block', 
+      marginLeft: 'auto', 
+      marginRight: 'auto', 
+      width: '50%'
     },
     buttons: {
       display: 'flex',
@@ -666,14 +772,12 @@ export default function StepperView() {
   const [ questionnaire ] = controller.questionnaireController
   const [ evaluators ] = controller.userListController;
 
-  // const conditions = [
-  //   details.name.length > 5,
-  //   tasks.length > 0,
-  //   questionnaire.id !== undefined,
-  //   evaluators.length > 0
-  // ]
-
-  const conditions = [ true, true, true, true ];
+  const conditions = [
+    details.name.length > 5,
+    tasks.length > 0,
+    questionnaire.id !== undefined,
+    evaluators.length > 0
+  ]
 
   const completeStep = step => conditions[step];
 
@@ -705,14 +809,57 @@ export default function StepperView() {
     setActiveStep(prevActiveStep => prevActiveStep - 1);
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
+  const Alert = (props) => <MuiAlert elevation={6} variant="filled" {...props} />;
+
+  const { viewController } = useContext(AssessmentContext);
+  const [ view, setView ] = viewController;
+
+  const [dataSnackbar, setDataSnackbar] = useState({
+    open: false,
+    severity: 'success',
+    message: "it's alright is okay"
+  });
+
+  const handleOpenSnackbar = (severity, message) => {
+    setDataSnackbar({
+      open: true,
+      severity,
+      message
+    });
+  }
+
+  const handleCloseSnackbar = () => {
+    setDataSnackbar({
+      ...dataSnackbar,
+      open: false,
+    });
+  }
+
+  const backToShow = () => {
+    if(view === 'create') {
+      setView('show');
+    }
   };
 
-  const handleFinish = () => {
-    console.log({questionnaire, details, tasks});
+  const storeAssessment = async (info) => {
+    const response = await api.post('/assessments/store.php', info);
+    const { data } = response;
+    if(data.status === 'success') {
+      handleOpenSnackbar('success', 'You have successfully created the Assessment!');
+    } else {
+      handleOpenSnackbar('error', 'The Assessment was not created');
+    }
+  }
+
+  const handleConfirm = () => {
+    storeAssessment({
+      name: details.name,
+      detail: details.detail,
+      questionnaire_id: Number(questionnaire.id),
+      tasks_id: tasks.map(task => Number(task.id)),
+      evaluators_id: evaluators.map(evaluator => Number(evaluator.id))
+    })
     handleNext();
-    alert('finish');
   }
 
   const classes = useStyles();
@@ -726,15 +873,23 @@ export default function StepperView() {
             </Step>
           ))}
         </Stepper>
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          autoHideDuration={6000}
+          open={dataSnackbar.open}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={dataSnackbar.severity}>
+            {dataSnackbar.message}
+          </Alert>
+        </Snackbar>
         <div>
           {activeStep === steps.length ? (
             <div>
               <div className={classes.finalContainer}>
                 <img 
                   className={classes.image}
-                  src={CompletedStepsImage} 
-                  width="500" 
-                  heigth="300" 
+                  src={CompletedStepsSvg} 
                   alt="All steps have been completed!" 
                 />
                 <Typography 
@@ -745,7 +900,7 @@ export default function StepperView() {
                 </Typography>
               </div>
               <div className={classes.buttons}>
-                <Button onClick={handleReset}>Create another Assessment</Button>
+                <Button onClick={backToShow}>View Assessments</Button>
               </div>
             </div>
           ) : (
@@ -771,8 +926,8 @@ export default function StepperView() {
                     Next
                   </Button>
                 ) : (
-                  <Button variant="contained" color="secondary" onClick={handleFinish}>
-                    Finish
+                  <Button variant="contained" color="secondary" onClick={handleConfirm}>
+                    Confirm
                   </Button>
                 )}
               </div>

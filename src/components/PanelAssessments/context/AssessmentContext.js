@@ -4,8 +4,7 @@ export const AssessmentContext = createContext();
 
 export default function AssessmentProvider({ children }) {
   
-  const currentAssessmentController = useState(null);
-
+  const currentAssessmentController = useState({});
   const viewController = useState('show');
 
   const state = {

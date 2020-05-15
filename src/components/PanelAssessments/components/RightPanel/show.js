@@ -1,10 +1,22 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import api from '../../../../services/api';
 import { AssessmentContext } from '../../context/AssessmentContext';
-import { Grid, Typography, Divider, Modal, Button } from '@material-ui/core';
-import { List, ListItem, ListItemText } from '@material-ui/core';
-import { Card, CardContent } from '@material-ui/core';
+import SelectAssessmentSvg from '../../../../assets/instant_information.svg'
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import Modal from '@material-ui/core/Modal';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import { ExpandMore as ExpandMoreIcon } from '@material-ui/icons';
-import { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 const lorens = [
@@ -17,21 +29,37 @@ const lorens = [
 
 const loren = () => (lorens[Math.floor(Math.random() * lorens.length)]);
 
+const Divider = () => <hr></hr>;
+
 const TaskList = ({ classes }) => {
 
-  const tasks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(item => (
-    {
-      id: item,
-      name: `task ${item + 1}`,
-      detail: loren()
+  const controller = useContext(AssessmentContext);
+  const [currentAssessment] = controller.currentAssessmentController;
+
+  const [tasks, setTasks] = useState([])
+
+  const loadTasks = async (id) => {
+    const response = await api.post('/assessments/tasks.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setTasks(data.docs);
+    } else {
+     alert('error to load tasks');
     }
-  ))
+  }
+
+  useEffect(() => {
+    if(currentAssessment.id) {
+      loadTasks(currentAssessment.id);
+    }
+  }, [currentAssessment])
 
   return (
     <div className={classes.list}>
-      <Typography className={classes.header} variant="body1" component="h6">
-        Tasks
+      <Typography className={classes.header} variant="body1" align="center">
+        TASK LIST
       </Typography>
+      <Divider />
       <List component="div">
         {tasks.map(task => (
           <TaskItem key={task.id} task={task} />
@@ -229,19 +257,34 @@ const TaskItem = ({ task }) => {
 }
 
 const EvaluatorsList = ({ classes }) => {
-  const evaluators = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(item => (
-    {
-      id: item,
-      name: `evaluator ${item + 1}`,
-      email: `evaluator.number${item + 1}@email.com`
+
+  const controller = useContext(AssessmentContext);
+  const [currentAssessment] = controller.currentAssessmentController;
+
+  const [evaluators, setEvaluators] = useState([])
+
+  const loadEvaluators = async (id) => {
+    const response = await api.post('/assessments/evaluators.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setEvaluators(data.docs);
+    } else {
+     alert('error to load evaluators');
     }
-  ))
+  }
+
+  useEffect(() => {
+    if(currentAssessment.id) {
+      loadEvaluators(currentAssessment.id);
+    }
+  }, [currentAssessment])
 
   return (
     <div className={classes.list}>
-      <Typography className={classes.header} variant="body1" component="h6">
-        Evaluators
+      <Typography className={classes.header} variant="body1" align="center">
+        EVALUATOR LIST
       </Typography>
+      <Divider />
       <List component="div">
         {evaluators.map(evaluator => (
           <EvaluatorItem key={evaluator.id} evaluator={evaluator} />
@@ -258,11 +301,21 @@ const EvaluatorItem = ({ evaluator }) => {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    paper: {
-      backgroundColor: theme.palette.background.paper,
+    modalPaper: {
+      background: '#FFF',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
       width: 650
+    },
+    paper: {
+      marginTop: theme.spacing(1),
+      background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)'
+    },
+    primary: {
+      color: '#FFF'
+    },
+    secondary: {
+      color: '#EEE'
     }
   }));
 
@@ -276,18 +329,22 @@ const EvaluatorItem = ({ evaluator }) => {
 
   return (
     <>
-      <ListItem button onClick={handleClickOpen}>
-        <ListItemText 
-          primary={evaluator.name}
-          secondary={evaluator.email}
-        />
-      </ListItem>
+      <Paper className={classes.paper}>
+        <ListItem button onClick={handleClickOpen}>
+          <Tooltip title="Click to view more information" arrow placement="top">
+            <ListItemText 
+              primary={<Typography className={classes.primary}>{evaluator.name}</Typography>}
+              secondary={<Typography className={classes.secondary} variant="subtitle2">{evaluator.email}</Typography>}
+            />
+          </Tooltip>
+        </ListItem>
+      </Paper>
       <Modal
         className={classes.modal}
         open={open}
         onClose={handleClose}
       >
-        <div className={classes.paper}>
+        <div className={classes.modalPaper}>
           <Grid container>
             <Grid item sm={12}>
               <Typography variant="h4" component="h2">
@@ -329,9 +386,10 @@ const QuestionsList = ({ classes }) => {
 
   return (
     <div className={classes.list}>
-      <Typography className={classes.header} variant="body1" component="h6">
-        Questionnaire
+      <Typography className={classes.header} variant="body1" align="center">
+        QUESTIONNAIRE
       </Typography>
+      <Divider />
       <List>
         {questions.map(question => (
           <QuestionItem key={question.id} question={question} />
@@ -424,74 +482,90 @@ const QuestionItem = ({ question }) => {
 
 export default function ShowAssessmentPanel() {
   
-  const { currentAssessmentController } = useContext(AssessmentContext);
-  const [currentAssessment] = currentAssessmentController;
-
-  // const [assessment, setAssessment] = useState({});
+  const controller = useContext(AssessmentContext);
+  const [currentAssessment] = controller.currentAssessmentController;
+  const [view, setView] = controller.viewController
 
   const useStyles = makeStyles(theme => ({
-    root: {
+    info: {
       height: 200
     },
     header: {
-      margin: theme.spacing(2)
+      color: '#777',
+      margin: theme.spacing(1, 1, 0, 1)
     },
     list: {
       height: 450,
+      padding: theme.spacing(1),
       overflowY: 'auto'
     }
   }));
 
-  /*
+  const handleCreateAssessment = () => {
+    if(view !== 'create') {
+      setView('create');
+    }
+  }
 
   useEffect(() => {
-    loadAssessment();
+    if(currentAssessment.id){
+      loadAssessment(currentAssessment.id);
+    }
   }, [currentAssessment]);
 
-  const loadAssessment = () => {
-    const response = api.post('/assessments/show.php', { id: Number(currentAssessment.id) });
-    if(response.data.status === 'success') {
-      setAssessment(response.data.docs);
+  const [assessment, setAssessment] = useState({});
+
+  const loadAssessment = async (id) => {
+    const response = await api.post('/assessments/show.php', { id: Number(id) });
+    const { data } = response;
+    if(data.status === 'success') {
+      setAssessment(data.docs);
     } else {
      alert('error to load Assessment');
     }
   }
 
-  */
+  console.log(assessment);
 
   const classes = useStyles();
 
+  const { manager, questionnaire } = assessment;
+
   return (
     <Grid container>
-      {currentAssessment ? (
+      {assessment.id ? (
         <>
-          <Grid item sm={8}>
-            <Card className={classes.root}>
+          <Grid item sm={6}>
+            <Card className={classes.info}>
               <CardContent>
                 <Typography variant="h4" component="h2">
-                  {currentAssessment.name}
+                  {assessment.name}
                 </Typography>
                 <Typography variant="body1" component="p">
-                  {currentAssessment.detail}
+                  {assessment.detail}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item sm={4}>
-            <Card className={classes.root}>
+          <Grid item sm={6}>
+            <Card className={classes.info}>
               <CardContent>
                 <Typography variant="h5" component="h2">
                   Informations
                 </Typography>
                 <Typography variant="body2" component="p">
-                  Manager: Bruno
+                  Manager: {manager.name}
                 </Typography>
                 <Typography variant="body2" component="p">
-                  Questionnaire: Questionnaire 1
+                  Questionnaire: {questionnaire.name}
                 </Typography>
-                <Typography variant="body2" component="p">
-                  This assessment is not complete yet
-                </Typography>
+                {assessment.completed_at ? (
+                  <div>This assessment was completed at {assessment.completed_at}</div>
+                ) : (
+                  <Typography variant="body2" component="p">
+                    This assessment is not complete yet
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           </Grid>
@@ -506,7 +580,28 @@ export default function ShowAssessmentPanel() {
           </Grid>
         </>
       ) : (
-        'Select some assessment please'
+        <div>
+          <Typography 
+            style={{ color: '#444', margin: 30 }} 
+            align="center" 
+            variant="h4"
+          >
+            Select a assessment on the Left
+          </Typography>
+          <img 
+            style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto', width: '50%' }} 
+            src={SelectAssessmentSvg} 
+            alt="Select some assessment" 
+          /> 
+          <Typography 
+            style={{ color: '#88f', margin: 30, cursor: 'pointer' }} 
+            align="center" 
+            variant="subtitle1"
+            onClick={handleCreateAssessment}
+          >
+            Or Click here to add a New Assessment
+          </Typography>
+        </div>
       )}
     </Grid>
   );

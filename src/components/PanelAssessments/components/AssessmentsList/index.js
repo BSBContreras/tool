@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import api from '../../../../services/api'
 import { AssessmentContext } from '../../context/AssessmentContext';
 import { List, ListItem, ListItemText, ListItemIcon } from '@material-ui/core';
 import { Add as AddIcon } from '@material-ui/icons';
@@ -64,31 +65,14 @@ export default function AssessmentList() {
 
   const [assessments, setAssessments] = useState([]);
 
-  const loadAssessments = () => {
-    setAssessments(
-      [
-        {
-          id: 1,
-          name: 'assessment 1',
-          detail: 'detail assessment 1'
-        },
-        {
-          id: 2,
-          name: 'assessment 2',
-          detail: 'detail assessment 2'
-        },
-        {
-          id: 3,
-          name: 'assessment 3',
-          detail: 'detail assessment 3'
-        },
-        {
-          id: 4,
-          name: 'assessment 4',
-          detail: 'detail assessment 4'
-        }
-      ]
-    );
+  const loadAssessments = async () => {
+    const response = await api.post('/assessments/index.php');
+      const { data } = response;
+      if(data.status === 'success') {
+        setAssessments(data.docs);
+      } else {
+        alert('Error on load assessments');
+      }
   }
 
   useEffect(() => {
