@@ -54,8 +54,8 @@ const CreateAssessment = () => {
         <AddIcon />
       </ListItemIcon>
       <ListItemText 
-        primary="Add new Assessment"
-        secondary="Click here to add a new assessment"
+        primary="Add new Evaluation"
+        secondary="Click here to add a new evaluation"
       />
     </ListItem>
   );
@@ -71,7 +71,7 @@ export default function AssessmentList() {
       if(data.status === 'success') {
         setAssessments(data.docs);
       } else {
-        alert('Error on load assessments');
+        alert('Error on load evaluation');
       }
   }
 

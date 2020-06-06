@@ -13,13 +13,16 @@ export default function Header({ setPage }) {
 		title: {
 			flexGrow: 1,
 		},
+		AppBar: {
+			background: theme.palette.primary
+		}
 	}));
 
 	const classes = useStyles();
 
 	return (
 		<div className={classes.root}>
-			<AppBar position="static">
+			<AppBar position="static" className={classes.AppBar}>
 				<Toolbar>
 					<Typography variant="h6" className={classes.title}>
 						Inspect Tool

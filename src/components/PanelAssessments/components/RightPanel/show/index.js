@@ -344,7 +344,7 @@ export default function ShowAssessmentPanel() {
     if(data.status === 'success') {
       setAssessment(data.docs);
     } else {
-     alert('error to load Assessment');
+     alert('error to load Evaluation');
     }
   }
 
@@ -414,7 +414,7 @@ export default function ShowAssessmentPanel() {
           <img 
             style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto', width: '50%' }} 
             src={SelectAssessmentSvg} 
-            alt="Select some assessment" 
+            alt="Select some evaluation" 
           /> 
           <Typography 
             style={{ color: '#88f', margin: 30, cursor: 'pointer' }} 
