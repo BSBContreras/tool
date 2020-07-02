@@ -25,9 +25,9 @@ export default function Header({ setPage }) {
 			<AppBar position="static" className={classes.AppBar}>
 				<Toolbar>
 					<Typography variant="h6" className={classes.title}>
-						Inspect Tool
+						Co-Inspect Tool
 					</Typography>
-					<Button color="inherit" onClick={() => setPage('assessments')}>Assessments</Button>
+					<Button color="inherit" onClick={() => setPage('assessments')}>Evaluations</Button>
 					<Button color="inherit" onClick={() => setPage('questionnaires')}>Questionnaires</Button>
 					<Button color="inherit" onClick={() => setPage('websites')}>Websites</Button>
 				</Toolbar>

@@ -446,7 +446,7 @@ const Constructor = () => {
   );
 }
 
-export default function ShowAssessmentPanel() {
+export default function RightPanel() {
   const useStyles = makeStyles(theme => ({
     column: {
       margin: theme.spacing(1),

@@ -9,7 +9,10 @@ import { blue, indigo } from '@material-ui/core/colors';
 const theme = createMuiTheme({
   palette: {
     primary: blue,
-    secondary: indigo
+    secondary: indigo,
+    link: {
+      blue: '#88F'
+    }
   },
   typography: {
     fontFamily: [

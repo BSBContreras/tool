@@ -348,8 +348,6 @@ export default function ShowAssessmentPanel() {
     }
   }
 
-  console.log(assessment);
-
   const classes = useStyles();
 
   const { manager, questionnaire } = assessment;
@@ -383,10 +381,10 @@ export default function ShowAssessmentPanel() {
                   Questionnaire: {questionnaire.name}
                 </Typography>
                 {assessment.completed_at ? (
-                  <div>This assessment was completed at {assessment.completed_at}</div>
+                  <div>This Evaluation was completed at {assessment.completed_at}</div>
                 ) : (
                   <Typography variant="body2" component="p">
-                    This assessment is not complete yet
+                    This Evaluation is not complete yet
                   </Typography>
                 )}
               </CardContent>
@@ -409,7 +407,7 @@ export default function ShowAssessmentPanel() {
             align="center" 
             variant="h4"
           >
-            Select a assessment on the Left
+            Select a Evaluation on the Left
           </Typography>
           <img 
             style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto', width: '50%' }} 
@@ -422,7 +420,7 @@ export default function ShowAssessmentPanel() {
             variant="subtitle1"
             onClick={handleCreateAssessment}
           >
-            Or Click here to add a New Assessment
+            Or Click here to add a New Evaluation
           </Typography>
         </div>
       )}

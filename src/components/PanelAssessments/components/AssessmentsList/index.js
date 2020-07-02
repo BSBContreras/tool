@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../../../../services/api'
 import { AssessmentContext } from '../../context/AssessmentContext';
-import { List, ListItem, ListItemText, ListItemIcon } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Add as AddIcon } from '@material-ui/icons';
 
 const AssessmentItem = ({ assessment }) => {
@@ -50,13 +54,15 @@ const CreateAssessment = () => {
 
   return (
     <ListItem button onClick={handleAddAssessment}>
-      <ListItemIcon>
-        <AddIcon />
-      </ListItemIcon>
       <ListItemText 
         primary="Add new Evaluation"
         secondary="Click here to add a new evaluation"
       />
+      <ListItemSecondaryAction>
+        <IconButton edge="end" onClick={handleAddAssessment}>
+          <AddIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
     </ListItem>
   );
 }
