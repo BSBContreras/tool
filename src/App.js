@@ -12,6 +12,18 @@ const theme = createMuiTheme({
     secondary: indigo,
     link: {
       blue: '#88F'
+    },
+    save: {
+      main: '#99EE99',
+      contrastText: '#333333'
+    },
+    duplicate: {
+      main: '#EDED66',
+      contrastText: '#333333'
+    },
+    remove: {
+      main: '#EE6666',
+      contrastText: '#333333'
     }
   },
   typography: {
