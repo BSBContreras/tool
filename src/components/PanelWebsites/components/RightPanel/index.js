@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import api from '../../../../services/api';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
+import CreateWebsiteDialog from '../WebsiteList/create';
 import CreatePageDialog from './createPage';
 import CreateTaskDialog from './createTask';
 import Grid from '@material-ui/core/Grid';
@@ -17,7 +18,6 @@ import AddIcon from '@material-ui/icons/Add';
 import MoreVert from '@material-ui/icons/MoreVert'
 import Delete from '@material-ui/icons/Delete'
 import Tooltip from '@material-ui/core/Tooltip';
-import CreateWebsiteDialog from '../WebsiteList/create';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import { TaskContext } from '../../context/TaskContext';
 import TaskProvider from '../../context/TaskContext';
@@ -315,6 +315,16 @@ const Constructor = () => {
   const [ newTaskAdd, setNewTaskAdd ] = newTaskAddController;
   const [ currentTask, setCurrentTask ] = taskController;
 
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  }
+
   const storeTask = async (task) => {
     const response = await api.post('/tasks/store.php', task);
     const { data } = response;
@@ -422,7 +432,7 @@ const Constructor = () => {
             <div>
               <Divider />
               <Typography align="center" style={{ color: '#999' }}>
-                Select any page on the right to save this task
+                Select any page on the middle to save this task
               </Typography>
             </div>
           )}
@@ -435,11 +445,12 @@ const Constructor = () => {
           <Typography 
             variant="subtitle2" 
             align="center" 
-            onClick={() => alert('create')} 
+            onClick={handleOpenDialog} 
             style={{ color: '#88f', cursor: 'pointer' }}
           >
             Click here to create a new task
           </Typography>
+          <CreateWebsiteDialog open={openDialog} handleClose={handleCloseDialog} />
         </div>
       )}
     </List>
@@ -478,12 +489,12 @@ export default function RightPanel() {
             </Grid>
             <Grid sm item className={classes.column}>
               <Paper>
-                <Constructor />
+                <PageList website={website} />
               </Paper>
             </Grid>
             <Grid sm item className={classes.column}>
               <Paper>
-                <PageList website={website} />
+                <Constructor />
               </Paper>
             </Grid>
         </TaskProvider>

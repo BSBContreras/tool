@@ -10,14 +10,18 @@ export default function RightPane() {
   const useStyles = makeStyles(theme => ({
     title: {
       color: '#444',
-      padding: theme.spacing(3)
+      padding: theme.spacing(3),
     },
     container: {
+      display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center'
     },
     svg: {
-      width: 'auto',
-      maxWidth: 500
+      display: 'block',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      maxWidth: '500px'
     },
     link: {
       color: theme.palette.link.blue, 

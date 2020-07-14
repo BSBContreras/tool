@@ -7,6 +7,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import AddQuestionDialog from './Add';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
 import { Add as AddIcon} from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles';
@@ -70,7 +71,7 @@ const QuestionHeader = () => {
   )
 }
 
-const QuestionItem = ({ question }) => {
+const QuestionItem = ({ question, reload }) => {
   const useStyles = makeStyles(theme => ({
     card: {
       margin: theme.spacing(1, 1, 0, 1),
@@ -100,6 +101,30 @@ const QuestionItem = ({ question }) => {
       color: theme.palette.duplicate.contrastText
     }
   }));
+
+  const { questionnaireController } = useContext(QuestionnaireContext);
+  const [ questionnaire ] = questionnaireController;
+
+  const handleRemoveQuestion = async () => {
+    if(window.confirm(`Remove question:"${question.text}"`)) {
+      const response = await api.post('questionnaires/sync.php',
+        {
+          id: Number(questionnaire.id),
+          attach: [],
+          detach: [
+            Number(question.id)
+          ]
+        }
+      );
+
+      const { data } = response;
+      if(data.status === 'success') {
+        reload();
+      } else {
+        alert('Error question remove')
+      }
+    }
+  }
 
   const classes = useStyles();
 
@@ -139,7 +164,7 @@ const QuestionItem = ({ question }) => {
         </Grid>
       </Grid>
       <CardActions className={classes.actions}>
-        <Button className={classes.remove}>
+        <Button onClick={handleRemoveQuestion} className={classes.remove}>
           Remove question
         </Button>
         <Button className={classes.change}>
@@ -150,7 +175,7 @@ const QuestionItem = ({ question }) => {
   );
 }
 
-const AddQuestion = () => {
+const AddQuestion = ({ reload }) => {
   const useStyles = makeStyles(theme => ({
     container: {
       display: 'flex',
@@ -168,19 +193,32 @@ const AddQuestion = () => {
     }
   }));
 
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    reload()
+  };
+
   const classes = useStyles();
 
   return (
-    <Paper className={classes.container}>
-      <AddIcon className={classes.icon} />
-      <Typography variant="body1" component="p" align="center">
-        Add questions to this questionnaire
-      </Typography>
-    </Paper>
+    <div>
+      <Paper className={classes.container} onClick={handleClickOpen}>
+        <AddIcon className={classes.icon} />
+        <Typography variant="body1" component="p" align="center">
+          Add questions to this questionnaire
+        </Typography>
+      </Paper>
+      <AddQuestionDialog open={open} handleClose={handleClose} />
+    </div>
   );
 }
 
-const Actions = () => {
+const Actions = ({ reload }) => {
   const useStyles = makeStyles(theme => ({
     container: {
       display: 'flex',
@@ -204,17 +242,33 @@ const Actions = () => {
     }
   }))
 
+  const { questionnaireController } = useContext(QuestionnaireContext);
+  const [ questionnaire, setQuestionnaire ] = questionnaireController;
+
+  const handleDeleteQuestionnaire = async () => {
+    if(window.confirm(`Delete questionnaire "${questionnaire.name}"`)) {
+      const response = await api.post('questionnaires/delete.php', { id: Number(questionnaire.id) });
+
+      const { data } = response;
+      if(data.status === 'success') {
+        setQuestionnaire({});
+      } else {
+        alert('Error questionnaire delete')
+      }
+    }
+  }
+
   const classes = useStyles();
 
   return (
-    <div classNam={classes.container}>
+    <div className={classes.container}>
       <Button className={classes.save} size="large">
         Save Changes
       </Button>
       <Button className={classes.duplicate} size="large">
         Duplicate Questionnaire
       </Button>
-      <Button className={classes.remove} size="large">
+      <Button onClick={handleDeleteQuestionnaire} className={classes.remove} size="large">
         Delete Questionnaire
       </Button>
     </div>
@@ -253,10 +307,14 @@ export default function ShowQuestions() {
     }
   }
 
-  useEffect(() => {
+  const reload = () => {
     if(currentQuestionnaire.id) {
       loadQuestions(currentQuestionnaire.id);
     }
+  }
+
+  useEffect(() => {
+    loadQuestions(currentQuestionnaire.id);
   }, [currentQuestionnaire])
 
   const classes = useStyles();
@@ -267,13 +325,13 @@ export default function ShowQuestions() {
         <Typography className={classes.title} variant="h5" noWrap>
           {currentQuestionnaire.name}
         </Typography>
-        <Actions />
+        <Actions reload={reload} />
       </div>
       <QuestionHeader />
       {questions.map((question, index) => (
-        <QuestionItem key={index} question={question} />
+        <QuestionItem key={index} question={question} reload={reload} />
       ))}
-      <AddQuestion />
+      <AddQuestion reload={reload} />
     </div>
   )
 }

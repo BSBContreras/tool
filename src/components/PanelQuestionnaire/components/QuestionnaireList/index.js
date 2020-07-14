@@ -7,6 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
+import { makeStyles } from '@material-ui/core/styles';
 import { Add as AddIcon } from '@material-ui/icons';
 
 const QuestionnaireItem = ({ questionnaire }) => {
@@ -32,6 +33,12 @@ const QuestionnaireItem = ({ questionnaire }) => {
 }
 
 const CreateQuestionnaire = () => {
+  const useStyles = makeStyles(theme => ({
+    add: {
+      backgroundColor: theme.palette.save.main
+    }
+  }))
+
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -41,9 +48,11 @@ const CreateQuestionnaire = () => {
     setOpen(false);
   };
 
+  const classes = useStyles();
+
   return (
     <div>
-      <ListItem button onClick={handleClickOpen}>
+      <ListItem className={classes.add} button onClick={handleClickOpen}>
         <ListItemText 
           primary="Add new questionnaire"
           secondary="Click here to add a new questionnaire"
