@@ -20,6 +20,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { QuestionContext } from '../../context/QuestionContext';
 
 const styles = (theme) => ({
   root: {
@@ -61,7 +62,13 @@ const DialogActions = withStyles((theme) => ({
   },
 }))(MuiDialogActions);
 
-const QuestionItem = ({ question, addQuestion, removeQuestion }) => {
+const QuestionItem = ({ 
+  question, 
+  answerTypes, 
+  addQuestion, 
+  removeQuestion 
+}) => {
+
   const useStyles = makeStyles(theme => ({
     container: {
       backgroundColor: theme.palette.primary.light,
@@ -93,7 +100,7 @@ const QuestionItem = ({ question, addQuestion, removeQuestion }) => {
   }));
 
   const [checked, setChecked] = useState(false);
-  const [answerType, setAnserType] = useState('Text');
+  const [answerType, setAnserType] = useState(1);
 
   const handleChange = event => {
     const { checked } = event.target;
@@ -104,12 +111,22 @@ const QuestionItem = ({ question, addQuestion, removeQuestion }) => {
       removeQuestion(question);
     }
 
-    setChecked(checked)
+    setChecked(checked);
   }
 
   const handleChangeAnswerType = event => {
-    setAnserType(event.target.value);
+    const { value: answerType } = event.target;
+
+    removeQuestion(question);
+    setAnserType(answerType);
   };
+
+  useEffect(() => {
+    if(checked) {
+      addQuestion({...question, answerType})
+    }
+  // eslint-disable-next-line
+  }, [answerType])
 
   const classes = useStyles();
 
@@ -140,9 +157,9 @@ const QuestionItem = ({ question, addQuestion, removeQuestion }) => {
               value={answerType}
               onChange={handleChangeAnswerType}
               >
-              <MenuItem value={'Text'}>Text</MenuItem>
-              <MenuItem value={'Ratio'}>Ratio</MenuItem>
-              <MenuItem value={'Yes/No'}>Yes/No</MenuItem>
+                {answerTypes.map((answerType, index) => (
+                  <MenuItem key={index} value={answerType.id}>{answerType.name}</MenuItem>
+                ))}
             </Select>
           </FormControl>
           <div className={classes.elements}>
@@ -163,10 +180,10 @@ const QuestionItem = ({ question, addQuestion, removeQuestion }) => {
   );
 }
 
-export default function CreateQuestionnaire({ open, handleClose }) {
+export default function AddQuestion({ open, handleClose }) {
   const useStyles = makeStyles(theme => ({
     content: {
-      maxHeight: 600,
+      maxHeight: '80vh',
       overFlowY: 'auto'
     }
   }))
@@ -174,20 +191,10 @@ export default function CreateQuestionnaire({ open, handleClose }) {
   const { questionnaireController } = useContext(QuestionnaireContext);
   const [ questionnaire ] = questionnaireController;
 
-  const [criteria, setCriteria] = useState([]);
+  const { answerTypes, criteria } = useContext(QuestionContext);
+
   const [questions, setQuestions] = useState([]);
   const [selecteds, setSelecteds] = useState([]);
-
-  const loadCriteria = async () => {
-    const response = await api.post('/criteria/index.php');
-
-    const { data } = response;
-    if(data.status === 'success') {
-      setCriteria(data.docs);
-    } else {
-      alert('Error on load criteria');
-    }
-  }
 
   const loadQuestions = async id => {
     const response = await api.post('/criteria/questions.php', { id: Number(id) });
@@ -201,10 +208,20 @@ export default function CreateQuestionnaire({ open, handleClose }) {
   }
   
   const handleStoreQuestions = async () => {
+    if(selecteds.length === 0) {
+      handleClose();
+      return;
+    }
+
     const response = await api.post('questionnaires/sync.php',
       {
         id: Number(questionnaire.id),
-        attach: selecteds.map(question => question.id),
+        attach: selecteds.map(question => (
+          { 
+            id: Number(question.id), 
+            answer_type_id: Number(question.answerType)
+          }
+        )),
         detach: []
       }
     );
@@ -231,10 +248,6 @@ export default function CreateQuestionnaire({ open, handleClose }) {
     setSelecteds([...selecteds.filter(({ id }) => question.id !== id)]);
   }
 
-  useEffect(() => {
-    loadCriteria();
-  }, []);
-
   const classes = useStyles();
 
   return (
@@ -257,6 +270,7 @@ export default function CreateQuestionnaire({ open, handleClose }) {
             <QuestionItem 
               key={index} 
               question={question} 
+              answerTypes={answerTypes}
               addQuestion={addQuestion}
               removeQuestion={removeQuestion}
             />

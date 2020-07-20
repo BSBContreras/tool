@@ -71,7 +71,7 @@ export default function CreateQuestionnaire({ open, handleClose }) {
     if(data.status === 'success') {
       setCurrentQuestionnaire(data.docs);
     } else {
-      alert('Error on load designers');
+      alert('Error on store questionnaire');
     }
   }
 
@@ -97,7 +97,7 @@ export default function CreateQuestionnaire({ open, handleClose }) {
   const submit = () => {
     if(withoutErrors()) {
       storeQuestionnaire({
-        name, detail
+        name, detail, manager_id: 2
       });
       handleClose();
       setName('');

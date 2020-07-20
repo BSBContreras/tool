@@ -8,6 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import AddQuestionDialog from './Add';
+import ChangeAnswerTypeDialog from './ChangeAnswerType';
+import DuplicateQuestionnaireDialog from './DuplicateQuestionnaire';
+import QuestionContextProvider from '../../context/QuestionContext';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
 import { Add as AddIcon} from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles';
@@ -105,6 +108,8 @@ const QuestionItem = ({ question, reload }) => {
   const { questionnaireController } = useContext(QuestionnaireContext);
   const [ questionnaire ] = questionnaireController;
 
+  const [openChangeDialog, setOpenChangeDialog] = useState(false);
+
   const handleRemoveQuestion = async () => {
     if(window.confirm(`Remove question:"${question.text}"`)) {
       const response = await api.post('questionnaires/sync.php',
@@ -126,52 +131,69 @@ const QuestionItem = ({ question, reload }) => {
     }
   }
 
+  const handleOpenChangeAnswerType = () => {
+    setOpenChangeDialog(true);
+  }
+
+  const handleCloseChangeAnswerType = () => {
+    setOpenChangeDialog(false);
+    reload();
+  }
+
   const classes = useStyles();
 
   return (
-    <Card className={classes.card}>
-      <Grid container>
-        <Grid item sm={2} >
-          <CardContent className={classes.criterion}>
-            <Typography variant="body2" component="p">
-              {question.criterion}
-            </Typography>
-          </CardContent>
+    <div>
+      <Card className={classes.card}>
+        <Grid container>
+          <Grid item sm={2} >
+            <CardContent className={classes.criterion}>
+              <Typography variant="body2" component="p">
+                {question.criterion}
+              </Typography>
+            </CardContent>
+          </Grid>
+          <Grid item sm={6}>
+            <CardContent className={classes.question}>
+              <Typography variant="body1" component="p">
+                {question.text}
+              </Typography>
+            </CardContent>
+          </Grid>
+          <Grid item sm={2}>
+            <CardContent className={classes.element}>
+              <Typography variant="body2" component="p" align="center">
+                {question.element_1}
+              </Typography>
+              <Typography variant="body2" component="p" align="center">
+                {question.element_2}
+              </Typography>
+            </CardContent>
+          </Grid>
+          <Grid item sm={2}>
+            <CardContent className={classes.element}>
+              <Typography variant="body2" component="p" align="center">
+                {question.answer_type_name}
+              </Typography>
+            </CardContent>
+          </Grid>
         </Grid>
-        <Grid item sm={6}>
-          <CardContent className={classes.question}>
-            <Typography variant="body1" component="p">
-              {question.text}
-            </Typography>
-          </CardContent>
-        </Grid>
-        <Grid item sm={2}>
-          <CardContent className={classes.element}>
-            <Typography variant="body2" component="p" align="center">
-              {question.element_1}
-            </Typography>
-            <Typography variant="body2" component="p" align="center">
-              {question.element_2}
-            </Typography>
-          </CardContent>
-        </Grid>
-        <Grid item sm={2}>
-          <CardContent className={classes.element}>
-            <Typography variant="body2" component="p" align="center">
-              Text
-            </Typography>
-          </CardContent>
-        </Grid>
-      </Grid>
-      <CardActions className={classes.actions}>
-        <Button onClick={handleRemoveQuestion} className={classes.remove}>
-          Remove question
-        </Button>
-        <Button className={classes.change}>
-          Change Answer Type
-        </Button>
-      </CardActions>
-    </Card>
+        <CardActions className={classes.actions}>
+          <Button onClick={handleRemoveQuestion} className={classes.remove}>
+            Remove question
+          </Button>
+          <Button onClick={handleOpenChangeAnswerType} className={classes.change}>
+            Change Answer Type
+          </Button>
+        </CardActions>
+      </Card>
+      {openChangeDialog && 
+        <ChangeAnswerTypeDialog 
+          question={question} 
+          handleClose={handleCloseChangeAnswerType} 
+        />
+      }
+    </div>
   );
 }
 
@@ -213,12 +235,12 @@ const AddQuestion = ({ reload }) => {
           Add questions to this questionnaire
         </Typography>
       </Paper>
-      <AddQuestionDialog open={open} handleClose={handleClose} />
+      {open && <AddQuestionDialog open handleClose={handleClose} />}
     </div>
   );
 }
 
-const Actions = ({ reload }) => {
+const Actions = () => {
   const useStyles = makeStyles(theme => ({
     container: {
       display: 'flex',
@@ -245,6 +267,8 @@ const Actions = ({ reload }) => {
   const { questionnaireController } = useContext(QuestionnaireContext);
   const [ questionnaire, setQuestionnaire ] = questionnaireController;
 
+  const [openDuplicateDialog, setOpenDuplicateDialog] = useState(false);
+
   const handleDeleteQuestionnaire = async () => {
     if(window.confirm(`Delete questionnaire "${questionnaire.name}"`)) {
       const response = await api.post('questionnaires/delete.php', { id: Number(questionnaire.id) });
@@ -258,20 +282,29 @@ const Actions = ({ reload }) => {
     }
   }
 
+  const handleOpenDuplicateDialog = () => {
+    setOpenDuplicateDialog(true);
+  }
+
+  const handleCloseDuplicateDialog = () => {
+    setOpenDuplicateDialog(false);
+  }
+
   const classes = useStyles();
 
   return (
-    <div className={classes.container}>
-      <Button className={classes.save} size="large">
-        Save Changes
-      </Button>
-      <Button className={classes.duplicate} size="large">
-        Duplicate Questionnaire
-      </Button>
-      <Button onClick={handleDeleteQuestionnaire} className={classes.remove} size="large">
-        Delete Questionnaire
-      </Button>
+    <div>
+      <div className={classes.container}>
+        <Button onClick={handleOpenDuplicateDialog} className={classes.duplicate} size="large">
+          Duplicate Questionnaire
+        </Button>
+        <Button onClick={handleDeleteQuestionnaire} className={classes.remove} size="large">
+          Delete Questionnaire
+        </Button>
+      </div>
+      {openDuplicateDialog && <DuplicateQuestionnaireDialog handleClose={handleCloseDuplicateDialog} />}
     </div>
+   
   )
 }
 
@@ -320,19 +353,21 @@ export default function ShowQuestions() {
   const classes = useStyles();
 
   return (
-    <div className={classes.container}>
-      <div className={classes.header}>
-        <Typography className={classes.title} variant="h5" noWrap>
-          {currentQuestionnaire.name}
-        </Typography>
-        <Actions reload={reload} />
+    <QuestionContextProvider>
+      <div className={classes.container}>
+        <div className={classes.header}>
+          <Typography className={classes.title} variant="h5" noWrap>
+            {currentQuestionnaire.name}
+          </Typography>
+          <Actions />
+        </div>
+        <QuestionHeader />
+        {questions.map((question, index) => (
+          <QuestionItem key={index} question={question} reload={reload} />
+        ))}
+        <AddQuestion reload={reload} />
       </div>
-      <QuestionHeader />
-      {questions.map((question, index) => (
-        <QuestionItem key={index} question={question} reload={reload} />
-      ))}
-      <AddQuestion reload={reload} />
-    </div>
+    </QuestionContextProvider>
   )
 }
 

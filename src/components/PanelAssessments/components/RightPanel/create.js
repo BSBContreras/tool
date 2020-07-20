@@ -116,7 +116,7 @@ const ListQuestionnaires = () => {
     name: {
       color: '#FFF' 
     },
-    url: {
+    detail: {
       color: '#FFF' 
     }
   }))
@@ -276,7 +276,7 @@ const WebsiteList = ({ setWebsite }) => {
     name: {
       color: '#FFF' 
     },
-    url: {
+    detail: {
       color: '#FFF' 
     }
   }))
@@ -771,6 +771,8 @@ export default function StepperView() {
   const [ tasks ] = controller.tasksController;
   const [ questionnaire ] = controller.questionnaireController
   const [ evaluators ] = controller.userListController;
+
+  
 
   const conditions = [
     details.name.length > 5,
