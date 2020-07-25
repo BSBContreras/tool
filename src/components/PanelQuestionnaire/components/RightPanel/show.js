@@ -197,7 +197,7 @@ const QuestionItem = ({ question, reload }) => {
   );
 }
 
-const AddQuestion = ({ reload }) => {
+const AddQuestion = ({ reload, questions }) => {
   const useStyles = makeStyles(theme => ({
     container: {
       display: 'flex',
@@ -235,7 +235,7 @@ const AddQuestion = ({ reload }) => {
           Add questions to this questionnaire
         </Typography>
       </Paper>
-      {open && <AddQuestionDialog open handleClose={handleClose} />}
+      {open && <AddQuestionDialog open handleClose={handleClose} oldQuestions={questions} />}
     </div>
   );
 }
@@ -365,7 +365,7 @@ export default function ShowQuestions() {
         {questions.map((question, index) => (
           <QuestionItem key={index} question={question} reload={reload} />
         ))}
-        <AddQuestion reload={reload} />
+        <AddQuestion reload={reload} questions={questions} />
       </div>
     </QuestionContextProvider>
   )

@@ -180,7 +180,7 @@ const QuestionItem = ({
   );
 }
 
-export default function AddQuestion({ open, handleClose }) {
+export default function AddQuestion({ open, handleClose, oldQuestions }) {
   const useStyles = makeStyles(theme => ({
     content: {
       maxHeight: '80vh',
@@ -196,12 +196,18 @@ export default function AddQuestion({ open, handleClose }) {
   const [questions, setQuestions] = useState([]);
   const [selecteds, setSelecteds] = useState([]);
 
+  const filterQuestions = (newQuestions, oldQuestions) => {
+    const oldIds = oldQuestions.map(q => q.id);
+
+    return newQuestions.filter(q => !oldIds.includes(q.id));
+  }
+
   const loadQuestions = async id => {
     const response = await api.post('/criteria/questions.php', { id: Number(id) });
 
     const { data } = response;
     if(data.status === 'success') {
-      setQuestions(data.docs);
+      setQuestions(filterQuestions(data.docs, oldQuestions));
     } else {
       alert('Error on load questions');
     }
