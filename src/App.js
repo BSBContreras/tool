@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import Header from './components/layouts/Header';
-import Footer from './components/layouts/Footer';
+import Header from './components/Layouts/Header';
+import Footer from './components/Layouts/Footer';
+import LoginPage from './components/LoginPage';
 import Main from './components';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
@@ -40,11 +41,13 @@ export default function App() {
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
 
-      <Header setPage={setPage} />
+      <LoginPage />
 
-      <Main page={page} />
+      {/* <Header setPage={setPage} /> */}
 
-      <Footer />
+      {/* <Main page={page} /> */}
+
+      {/* <Footer /> */}
     </MuiThemeProvider>
   );
 }
