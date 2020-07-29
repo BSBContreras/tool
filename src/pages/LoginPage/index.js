@@ -1,63 +1,27 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
+// Material-ui imports
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
-import Collapse from '@material-ui/core/Collapse'
-import Alert from '@material-ui/lab/Alert';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
-const validateEmail = (email) => {
-  const reg = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return reg.test(String(email).toLowerCase());
-}
+// Context Imports
+import { GlobalContext } from '../../context/GlobalContext';
 
-const validatePassword = (password) => {
-  return password.length >= 8;
-}
+// Components Imports
+import BlueCheckbox from '../../components/BlueCheckbox';
+import AlertMessage from '../../components/AlertMessage';
 
-const validateName = (name) => {
-  if(name.length < 3) {
-    return false;
-  }
+// Utils Imports
+import { strBetween, validateEmail, validateName } from '../../utils';
+import { storeManager, loginManager } from '../../routes';
+import { RUNTIME_ERROR } from '../../constants';
 
-  const names = name.split(' ');
-
-  if(names.length < 2) {
-    return false;
-  }
-
-  return true;
-}
-
-const BlueCheckbox = withStyles({
-  root: {
-    color: '#22ACF0',
-    '&$checked': {
-      color: 'white',
-    }
-  }
-})(({children, className, ...props}) => 
-  <FormControlLabel 
-    className={className}
-    control={<Checkbox color="default" {...props} />} 
-    label={children} 
-  />
-);
-
-const AlertPopup = ({ open, type, children, ...other }) => {
-  return (
-    <Collapse in={open} {...other}>
-      <Alert variant="filled" severity={type}>
-        {children}
-      </Alert>
-    </Collapse>
-  )
-}
+const validatePassword = (password) => strBetween(password, 8, 32);
 
 const Tab = ({ selected, children, ...other }) => {
   const useStyles = makeStyles(theme => ({
@@ -129,10 +93,13 @@ const useStyles = makeStyles(theme => ({
 const LoginForm = ({ handleRegisterDisplay }) => {
 
   const [showPassword, setShowPassword]  = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState([]);
+
+  const { managerController } = useContext(GlobalContext);
+  const [ manager, setManager ] = managerController;
 
   const handleChangeRemember = (event) => {
     const { checked } = event.target;
@@ -158,6 +125,9 @@ const LoginForm = ({ handleRegisterDisplay }) => {
     if(!validateEmail(email)) {
       errors.push('Please enter a valid email');
     }
+    if(!validatePassword(password)) {
+      errors.push('Please enter a password between 8 to 32 characters')
+    }
     setErrors(errors);
     return errors.length === 0;
   }
@@ -165,7 +135,33 @@ const LoginForm = ({ handleRegisterDisplay }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     if(withoutErrors()) {
-      alert('login');
+      loginManager({
+        email, password
+      }).then(json => {
+
+        if(remember) {
+          localStorage.setItem('manager_data', JSON.stringify({
+            email: json.email,
+            password: json.password
+          }))
+        }
+
+        if(manager.id !== json.id) {
+          setManager(json);
+        }
+
+      }).catch(error => {
+
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          setErrors([error.detail]);
+          return;
+        }
+
+        alert('error');
+      }).finally(() => {
+
+        // Finnaly
+      });
     }
   }
 
@@ -176,6 +172,7 @@ const LoginForm = ({ handleRegisterDisplay }) => {
       <span className={classes.title}>Co-Inspect Tool</span>
       <TextField 
         id="email" 
+        required
         className={classes.textfield}
         label="Email" 
         value={email}
@@ -184,6 +181,7 @@ const LoginForm = ({ handleRegisterDisplay }) => {
       />
       <TextField 
         id="password" 
+        required
         className={classes.textfield}
         label="Password" 
         type={showPassword ? 'text' : 'password'}
@@ -200,12 +198,12 @@ const LoginForm = ({ handleRegisterDisplay }) => {
         fullWidth
         onChange={handleChangePassword}
       />
-      <span className={classes.action}>
+      <span onClick={() => alert('WIP')} className={classes.action}>
         Forgot password?
       </span>
-      <AlertPopup type="error" open={errors.length > 0} style={{ marginTop: 8 }}>
+      <AlertMessage type="error" open={errors.length > 0} style={{ marginTop: 8 }}>
         {errors.join('.\n')}
-      </AlertPopup>
+      </AlertMessage>
       <button onClick={handleSubmit} className={classes.button}>
         Login
       </button>
@@ -224,11 +222,14 @@ const LoginForm = ({ handleRegisterDisplay }) => {
 const RegisterForm = ({ handleLoginDisplay }) => {
 
   const [showPassword, setShowPassword]  = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState([]);
+
+  const { managerController } = useContext(GlobalContext);
+  const [ manager, setManager ] = managerController;
 
   const handleChangeRemember = (event) => {
     const { checked } = event.target;
@@ -271,8 +272,35 @@ const RegisterForm = ({ handleLoginDisplay }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     if(withoutErrors()) {
-      alert('register');
+      storeManager({
+        name, email, password
+      }).then(json => {
+
+        if(remember) {
+          localStorage.setItem('manager_data', JSON.stringify({
+            email: json.email,
+            password: json.password
+          }))
+        }
+
+        if(manager.id !== json.id) {
+          setManager(json);
+        }
+
+      }).catch(error => {
+
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          setErrors([error.detail]);
+          return;
+        }
+
+        alert('error');
+      }).finally(() => {
+
+        // Finnaly
+      });
     }
   }
 
@@ -283,6 +311,7 @@ const RegisterForm = ({ handleLoginDisplay }) => {
       <span className={classes.title}>Co-Inspect Tool</span>
       <TextField 
         id="name" 
+        required
         className={classes.textfield}
         label="Name" 
         value={name}
@@ -291,6 +320,7 @@ const RegisterForm = ({ handleLoginDisplay }) => {
       />
       <TextField 
         id="email" 
+        required
         className={classes.textfield}
         label="Email" 
         value={email}
@@ -299,6 +329,7 @@ const RegisterForm = ({ handleLoginDisplay }) => {
       />
       <TextField 
         id="password" 
+        required
         className={classes.textfield}
         label="Password" 
         type={showPassword ? 'text' : 'password'}
@@ -315,9 +346,9 @@ const RegisterForm = ({ handleLoginDisplay }) => {
         fullWidth
         onChange={handleChangePassword}
       />
-      <AlertPopup type="error" open={errors.length > 0} style={{ marginTop: 8 }}>
+      <AlertMessage type="error" open={errors.length > 0} style={{ marginTop: 8 }}>
         {errors.join('.\n')}
-      </AlertPopup>
+      </AlertMessage>
       <button onClick={handleSubmit} className={classes.button}>
         Register
       </button>
@@ -332,8 +363,6 @@ const RegisterForm = ({ handleLoginDisplay }) => {
     </form>
   );
 }
-
-
 
 export default function LoginPage() {
   const useStyles = makeStyles(theme => ({
@@ -368,6 +397,9 @@ export default function LoginPage() {
 
   const [display, setDisplay] = useState('login');
 
+  const { managerController } = useContext(GlobalContext);
+  const [ manager, setManager ] = managerController;
+
   const handleLoginDisplay = () => {
     if(display !== 'login') {
       setDisplay('login');
@@ -379,6 +411,38 @@ export default function LoginPage() {
       setDisplay('register');
     }
   }
+
+
+  // try auto login
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem('manager_data'));
+    
+    if(!data) {
+      return;
+    }
+
+    if(!data.email || !data.password) {
+      return;
+    }
+
+    loginManager(data).then(json => {
+
+      setManager(json);
+
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+        return;
+      }
+
+      alert('error');
+    }).finally(() => {
+
+      // Finnaly
+    });
+  }, [manager, setManager]);
+
 
   const classes = useStyles();
 

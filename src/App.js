@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Header from './components/Layouts/Header';
 import Footer from './components/Layouts/Footer';
-import LoginPage from './components/LoginPage';
+import Pages from './pages';
 import Main from './components';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import GlobalContext from './context/GlobalContext';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import { blue, indigo } from '@material-ui/core/colors';
 
@@ -39,15 +40,17 @@ export default function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <CssBaseline />
+      <GlobalContext>
+        <CssBaseline />
 
-      <LoginPage />
+        <Pages />
 
-      {/* <Header setPage={setPage} /> */}
+        {/* <Header setPage={setPage} /> */}
 
-      {/* <Main page={page} /> */}
+        {/* <Main page={page} /> */}
 
-      {/* <Footer /> */}
+        {/* <Footer /> */}
+      </GlobalContext>
     </MuiThemeProvider>
   );
 }

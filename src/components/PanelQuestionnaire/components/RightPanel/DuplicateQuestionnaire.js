@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
-import api from '../../../../services/api';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Collapse from '@material-ui/core/Collapse';
 import Alert from '@material-ui/lab/Alert';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
+import { duplicateQuestionnaire } from '../../../../routes';
 import Dialog from '../../../Dialog';
 
 export default function DuplicateQuestionnaire({ handleClose }) {
@@ -17,19 +17,6 @@ export default function DuplicateQuestionnaire({ handleClose }) {
   const [errors, setErrors] = useState([]);
 
   const validName = name => name.length >= 3 ? true : false;
-
-  const duplicateQuestionnaire = (store) => {
-    return new Promise(async (res, rej) => {
-      const response = await api.post('/questionnaires/duplicate.php', store);
-
-      const { data } = response;
-      if(data.status === 'success') {
-        res(data.docs);
-      } else {
-        rej('Error on duplicate questionnaire');
-      }
-    });
-  }
 
   const handleChageName = event => {
     const { value } = event.target;
@@ -61,7 +48,7 @@ export default function DuplicateQuestionnaire({ handleClose }) {
         setQuestionnaire(json);
       }).catch(error => {
 
-        alert(error);
+        alert(error.detail);
       }).finally(() => {
 
         handleClose();
