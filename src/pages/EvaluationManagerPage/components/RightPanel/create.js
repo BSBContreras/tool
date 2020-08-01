@@ -25,6 +25,18 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/AddCircle';
 import Snackbar from '@material-ui/core/Snackbar';
 
+import ListItemDefault from '../../../../components/ListItemDefault';
+import { GlobalContext } from '../../../../context/GlobalContext';
+import { RUNTIME_ERROR } from '../../../../constants';
+import { 
+  loadQuestionnairesByManager, 
+  loadQuestionsByQuestionnaire, 
+  loadWebsitesByManager,
+  loadTasksByWebsite
+} from '../../../../routes';
+
+const Divider = ({...props}) => <hr {...props}></hr>
+
 const AssessmentDetails = () => {
   const useStyles = makeStyles(theme => ({
     root: {
@@ -37,20 +49,20 @@ const AssessmentDetails = () => {
   }));
 
   const { detailsController } = useContext(CreateAssessmentContext);
-  const [ get, set ] = detailsController;
-  const { name, detail } = get;
+  const [ details, setDetails ] = detailsController;
+  const { name, detail } = details;
 
   const handleName = e => {
     const { value } = e.target;
     if(value.length <= 100) {
-      set({...get, name: value});
+      setDetails({...details, name: value});
     }
   }
 
   const handleDetails = e => {
     const { value } = e.target;
     if(value.length <= 300) {
-      set({...get, detail: value});
+      setDetails({...details, detail: value});
     }
   }
 
@@ -96,8 +108,6 @@ const ChooseQuestionnaire = () => {
 }
 
 const ListQuestionnaires = () => {
-  const Divider = () => <hr></hr>
-
   const useStyles = makeStyles(theme => ({
     root: {
       marginLeft: theme.spacing(2),
@@ -109,29 +119,15 @@ const ListQuestionnaires = () => {
     header: {
       color: '#777'
     },
-    paper: {
-      background: 'linear-gradient(45deg, #21CBF3 90%, #2196F3 30%)',
-      marginTop: 10
-    },
-    name: {
-      color: '#FFF' 
-    },
-    detail: {
-      color: '#FFF' 
-    }
   }))
 
   const { questionnaireController } = useContext(CreateAssessmentContext);
   const [ selectedQuestionnaire, setSelectedQuestionnaire ] = questionnaireController;
 
-  const [questionnaires, setQuestionnaires] = useState([]);
+  const { managerController } = useContext(GlobalContext);
+  const [ manager ] = managerController;
 
-  const loadQuestionnaires = async () => {
-		const response = await api.post('questionnaires/index.php');
-		response.data.status === 'success'
-			?	setQuestionnaires(response.data.docs)
-      :	alert('Error loading questionnaires')
-  }
+  const [questionnaires, setQuestionnaires] = useState([]);
 
   const handleSelectQuestionnaire = (questionnaire) => {
     if(selectedQuestionnaire !== questionnaire) {
@@ -140,8 +136,21 @@ const ListQuestionnaires = () => {
   }
   
   useEffect(() => {
-    loadQuestionnaires();
-  }, []);
+    loadQuestionnairesByManager({
+      manager_id: Number(manager.id)
+    }).then(data => {
+
+      setQuestionnaires(data.available);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Questionnaires');
+      }
+
+    })
+  }, [manager]);
 
   const classes = useStyles();
 
@@ -152,24 +161,19 @@ const ListQuestionnaires = () => {
       </Typography>
       <Divider />
       {questionnaires.map(questionnaire => (
-        <Paper key={questionnaire.id} className={classes.paper}>
-          <Tooltip title={questionnaire.detail || 'No details'} arrow placement="top">
-            <ListItem button onClick={() => handleSelectQuestionnaire(questionnaire)}>
-              <ListItemText 
-                primary={<Typography className={classes.name}>{questionnaire.name}</Typography>}
-                secondary={<Typography className={classes.detail} noWrap>{questionnaire.detail}</Typography>}
-              />
-            </ListItem>
-          </Tooltip>
-        </Paper>
+        <ListItemDefault
+          key={questionnaire.id}
+          primaryText={questionnaire.name}
+          secondaryText={questionnaire.detail}
+          tooltipText={questionnaire.detail}
+          onClick={() => handleSelectQuestionnaire(questionnaire)}
+        />
       ))}
     </List>
   )
 }
 
 const ListQuestions = () => {
-  const Divider = () => <hr></hr>
-
   const useStyles = makeStyles((theme) => ({
     root: {
       marginLeft: theme.spacing(2),
@@ -180,16 +184,6 @@ const ListQuestions = () => {
     },
     header: {
       color: '#777'
-    },
-    paper: {
-      background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
-      margin: theme.spacing(1)
-    },
-    criterion: {
-      color: '#FFF' 
-    },
-    text: {
-      color: '#DDD' 
     }
   }));
 
@@ -198,16 +192,22 @@ const ListQuestions = () => {
 
   const [questions, setQuestions] = useState([]);
 
-  const loadQuestions = async (id) => {
-		const response = await api.post('questionnaires/questions.php', { id: Number(id) });
-		response.data.status === 'success'
-			?	setQuestions(response.data.docs)
-      :	alert('Error loading questions')
-	}
-
   useEffect(() => {
     if(questionnaire.id) {
-      loadQuestions(questionnaire.id);
+      loadQuestionsByQuestionnaire({
+        id: Number(questionnaire.id)
+      }).then(data => {
+  
+        setQuestions(data);
+      }).catch(error => {
+  
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+        } else {
+          alert('Error on load Questions');
+        }
+  
+      })
     }
   }, [questionnaire]);
 
@@ -222,16 +222,13 @@ const ListQuestions = () => {
       <Grid container>
         {questions.map(question => (
           <Grid key={question.id} item sm={6}>
-            <Paper className={classes.paper}>
-              <Tooltip title={question.text || 'No details'} arrow placement="top">
-                <ListItem>
-                  <ListItemText 
-                    primary={<Typography className={classes.criterion}>{question.criterion}</Typography>}
-                    secondary={<Typography className={classes.text} variant="subtitle2" noWrap>{question.text}</Typography>}
-                  />
-                </ListItem>
-              </Tooltip>
-            </Paper>
+            <ListItemDefault
+              key={question.id}
+              primaryText={question.criterion}
+              secondaryText={question.text}
+              tooltipText={question.text}
+              onClick={() => {}}
+            />
           </Grid>
         ))}
       </Grid>
@@ -246,7 +243,7 @@ const ChooseTasks = () => {
   return (
     <Grid container>
       <Grid item sm={4}>
-        <WebsiteList setWebsite={setWebsite} />
+        <WebsiteList currentWebsite={website} setWebsite={setWebsite} />
       </Grid>
       <Grid item sm={8}>
         <TaskList website={website} />
@@ -255,9 +252,7 @@ const ChooseTasks = () => {
   )
 }
 
-const WebsiteList = ({ setWebsite }) => {
-  const Divider = () => <hr></hr>
-
+const WebsiteList = ({ currentWebsite, setWebsite }) => {
   const useStyles = makeStyles(theme => ({
     root: {
       marginLeft: theme.spacing(2),
@@ -269,35 +264,33 @@ const WebsiteList = ({ setWebsite }) => {
     header: {
       color: '#777'
     },
-    paper: {
-      background: 'linear-gradient(45deg, #21CBF3 90%, #2196F3 30%)',
-      marginTop: 10
-    },
-    name: {
-      color: '#FFF' 
-    },
-    detail: {
-      color: '#FFF' 
-    }
   }))
+
+  const { managerController } = useContext(GlobalContext);
+  const [ manager ] = managerController;
 
   const [websites, setWebsites] = useState([]);
 
-  const loadWebsites = async () => {
-    const response = await api.post('/websites/index.php');
-    const { data } = response;
-    if(data.status === 'success') {
-      setWebsites(data.docs);
-    } else {
-      alert('Error on load websites');
-    }
+  const handleSelectWebsite = website => {
+    setWebsite(website);
   }
 
-  const handleSelectWebsite = website => setWebsite(website)
-
   useEffect(() => {
-    loadWebsites();
-  }, []);
+    loadWebsitesByManager({
+      manager_id: Number(manager.id)
+    }).then(data => {
+
+      setWebsites(data);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Questions');
+      }
+
+    })
+  }, [manager]);
 
   const classes = useStyles();
 
@@ -308,16 +301,14 @@ const WebsiteList = ({ setWebsite }) => {
       </Typography>
       <Divider />
       {websites.map(website => (
-        <Paper key={website.id} className={classes.paper}>
-          <Tooltip title={website.url} arrow placement="top">
-            <ListItem button onClick={() => handleSelectWebsite(website)}>
-              <ListItemText 
-                primary={<Typography className={classes.name}>{website.name}</Typography>}
-                secondary={<Typography className={classes.url} noWrap>{website.url}</Typography>}
-              />
-            </ListItem>
-          </Tooltip>
-        </Paper>
+        <ListItemDefault
+          key={website.id}
+          primaryText={website.name}
+          secondaryText={website.url}
+          tooltipText={website.url}
+          active={currentWebsite === website}
+          onClick={() => handleSelectWebsite(website)}
+        />
       ))}
     </List>
   )
@@ -329,22 +320,6 @@ const TaskItem = ({ task }) => {
 
   const [selected, setSelected] = useState(false);
 
-  const useStyles = makeStyles(theme => ({
-    paper: {
-      background: 
-        selected 
-          ? 'linear-gradient(45deg, #2196F3 90%, #99FF99 30%)'
-          : 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
-      margin: theme.spacing(1)
-    },
-    name: {
-      color: '#FFF' 
-    },
-    detail: {
-      color: '#FFF' 
-    }
-  }))
-
   const handleClickTask = () => {
     if(selected) {
       setTasks(tasks.filter(selectedTask => selectedTask.id !== task.id ))
@@ -355,27 +330,22 @@ const TaskItem = ({ task }) => {
     }
   }
 
-  const classes = useStyles();
+  console.log(task)
 
   return (
     <Grid item sm={6}>
-      <Paper className={classes.paper}>
-        <Tooltip title={task.detail || 'No details'} arrow placement="top">
-          <ListItem button onClick={handleClickTask}>
-            <ListItemText 
-              primary={<Typography className={classes.name}>{task.name}</Typography>}
-              secondary={<Typography className={classes.detail} noWrap>{task.detail}</Typography>}
-            />
-          </ListItem>
-        </Tooltip>
-      </Paper>
+      <ListItemDefault
+        primaryText={task.name}
+        secondaryText={task.detail}
+        tooltipText={task.detail}
+        onClick={handleClickTask}
+        active={selected}
+      />
     </Grid>
   )
 }
 
 const TaskList = ({ website }) => {
-  const Divider = () => <hr></hr>
-
   const useStyles = makeStyles(theme => ({
     root: {
       marginLeft: theme.spacing(2),
@@ -391,19 +361,22 @@ const TaskList = ({ website }) => {
 
   const [tasks, setTasks] = useState([]);
 
-  const loadTasks = async (id) => {
-    const response = await api.post('/websites/tasks.php', { id: Number(id) });
-    const { data } = response;
-    if(data.status === 'success') {
-      setTasks(data.docs);
-    } else {
-      alert('Error on load tasks');
-    }
-  }
-
   useEffect(() => {
     if(website.id) {
-      loadTasks(website.id)
+      loadTasksByWebsite({
+        id: Number(website.id)
+      }).then(data => {
+  
+        setTasks(data);
+      }).catch(error => {
+  
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+        } else {
+          alert('Error on load Tasks');
+        }
+  
+      })
     }
   }, [website])
 
@@ -425,8 +398,6 @@ const TaskList = ({ website }) => {
 }
 
 const ChooseGroups = () => {
-  const Divider = () => <hr></hr>
-
   const useStyles = makeStyles((theme) => ({
     root: {
       width: '80%',
@@ -610,8 +581,6 @@ const ChooseGroups = () => {
 }
 
 const Confimation = () => {
-  const Divider = () => <hr></hr>;
-
   const useStyles = makeStyles(theme => ({
     root: {
       marginLeft: theme.spacing(2),
@@ -771,8 +740,6 @@ export default function StepperView() {
   const [ tasks ] = controller.tasksController;
   const [ questionnaire ] = controller.questionnaireController
   const [ evaluators ] = controller.userListController;
-
-  
 
   const conditions = [
     details.name.length > 5,

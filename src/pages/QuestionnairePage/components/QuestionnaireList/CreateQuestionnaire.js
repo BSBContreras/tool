@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
-import api from '../../../../services/api';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -13,6 +12,10 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Collapse from '@material-ui/core/Collapse';
 import Alert from '@material-ui/lab/Alert'
+
+import { storeQuestionnaire } from '../../../../routes';
+import { GlobalContext } from '../../../../context/GlobalContext';
+import { RUNTIME_ERROR } from '../../../../constants';
 
 const styles = (theme) => ({
   root: {
@@ -58,22 +61,14 @@ export default function CreateQuestionnaire({ open, handleClose }) {
   const { questionnaireController } = useContext(QuestionnaireContext);
   const [currentQuestionnaire, setCurrentQuestionnaire] = questionnaireController;
 
+  const { managerController } = useContext(GlobalContext);
+  const [ manager ] = managerController;
+
   const [name, setName] = useState('');
   const [detail, setDetail] = useState('');
   const [errors, setErrors] = useState([]);
 
   const validName = name => name.length >= 3 ? true : false;
-
-  const storeQuestionnaire = async (store) => {
-    const response = await api.post('/questionnaires/store.php', store);
-
-    const { data } = response;
-    if(data.status === 'success') {
-      setCurrentQuestionnaire(data.docs);
-    } else {
-      alert('Error on store questionnaire');
-    }
-  }
 
   const handleChageName = event => {
     const { value } = event.target;
@@ -97,11 +92,26 @@ export default function CreateQuestionnaire({ open, handleClose }) {
   const submit = () => {
     if(withoutErrors()) {
       storeQuestionnaire({
-        name, detail, manager_id: 2
+        name, 
+        detail,
+        manager_id: Number(manager.id)
+      }).then(json => {
+  
+        setCurrentQuestionnaire(json);
+      }).catch(error => {
+  
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+          return;
+        }
+  
+        alert('error');
+      }).finally(() => {
+  
+        handleClose();
+        setName('');
+        setDetail('');
       });
-      handleClose();
-      setName('');
-      setDetail('');
     }
   }
 

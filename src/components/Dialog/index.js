@@ -54,7 +54,9 @@ export default function DefaultDialog({
   title,
   children,
   submit,
-  submitText
+  submitText,
+  fullWidth,
+  maxWidth
 }) {
   const useStyles = makeStyles(theme => ({
     content: {
@@ -66,20 +68,27 @@ export default function DefaultDialog({
   const classes = useStyles();
 
   return (
-    <Dialog onClose={handleClose} open fullWidth>
+    <Dialog 
+      open
+      onClose={handleClose}  
+      fullWidth={fullWidth}
+      maxWidth={maxWidth || 'lg'}
+    >
       <DialogTitle onClose={handleClose}>{title}</DialogTitle>
       <DialogContent className={classes.content} dividers>{children}</DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button 
-          autoFocus 
-          color="primary"
-          onClick={submit}
-        >
-          {submitText || 'submit'}
-        </Button>
+        {submit && (
+          <Button 
+            autoFocus 
+            color="primary"
+            onClick={submit}
+          >
+            {submitText || 'submit'}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

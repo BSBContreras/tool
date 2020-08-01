@@ -5,7 +5,7 @@ import Collapse from '@material-ui/core/Collapse';
 import Alert from '@material-ui/lab/Alert';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
 import { duplicateQuestionnaire } from '../../../../routes';
-import Dialog from '../../../Dialog';
+import Dialog from '../../../../components/Dialog';
 
 export default function DuplicateQuestionnaire({ handleClose }) {
 

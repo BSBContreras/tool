@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Divider from '@material-ui/core/Divider';
-import Dialog from '../../../Dialog';
+import Dialog from '../../../../components/Dialog';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 import { makeStyles } from '@material-ui/core/styles';

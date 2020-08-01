@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import api from '../../../../services/api'
-import { AssessmentContext } from '../../context/AssessmentContext';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Add as AddIcon } from '@material-ui/icons';
+
+import { AssessmentContext } from '../../context/AssessmentContext';
+import { loadEvaluationsByManager } from '../../../../routes';
+import { GlobalContext } from '../../../../context/GlobalContext';
+import { RUNTIME_ERROR } from '../../../../constants';
 
 const AssessmentItem = ({ assessment }) => {
 
@@ -69,21 +72,27 @@ const CreateAssessment = () => {
 
 export default function AssessmentList() {
 
+  const { managerController } = useContext(GlobalContext);
+  const [ manager ] = managerController;
+
   const [assessments, setAssessments] = useState([]);
 
-  const loadAssessments = async () => {
-    const response = await api.post('/assessments/index.php');
-      const { data } = response;
-      if(data.status === 'success') {
-        setAssessments(data.docs);
-      } else {
-        alert('Error on load evaluation');
-      }
-  }
-
   useEffect(() => {
-    loadAssessments();
-  }, []);
+    loadEvaluationsByManager({
+      manager_id: manager.id
+    }).then(json => {
+
+      setAssessments(json);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Evaluations');
+      }
+
+    })
+  }, [manager]);
 
   return (
     <List component="nav">

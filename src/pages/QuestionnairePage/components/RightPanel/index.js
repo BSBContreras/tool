@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
 import { QuestionnaireContext } from '../../context/QuestionnaireContext';
 import Typography from '@material-ui/core/Typography';
-import CreateQuestionnaireDialog from '../../components/QuestionnaireList/create';
+import CreateQuestionnaireDialog from '../QuestionnaireList/CreateQuestionnaire';
 import Show from './show';
 import { makeStyles } from '@material-ui/core/styles';
 
