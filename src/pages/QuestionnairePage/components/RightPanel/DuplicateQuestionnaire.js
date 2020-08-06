@@ -62,6 +62,7 @@ export default function DuplicateQuestionnaire({ handleClose }) {
       submitText="Duplicate Questionnaire"
       handleClose={handleClose}
       submit={submit}
+      maxWidth="sm"
     >
       <Collapse in={errors.length > 0}>
         <Alert 

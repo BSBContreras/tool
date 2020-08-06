@@ -3,7 +3,9 @@ import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -12,7 +14,9 @@ export default function ListItemDefault({
   tooltipText,
   primaryText,
   secondaryText,
-  active
+  active,
+  onClicksecondaryAction,
+  iconSecondaryAction
 }) {
   const useStyles = makeStyles(theme => ({
     paper: {
@@ -28,6 +32,9 @@ export default function ListItemDefault({
     detail: {
       fontSize: 12,
       color: active ? '#FFFFFF' : theme.palette.primary.main
+    },
+    icon: {
+      color: active ? '#FFFFFF' : theme.palette.primary.main
     }
   }));
 
@@ -41,6 +48,13 @@ export default function ListItemDefault({
             primary={<Typography className={classes.name}>{primaryText}</Typography>}
             secondary={<Typography className={classes.detail} noWrap>{secondaryText}</Typography>}
           />
+          {onClicksecondaryAction && (
+            <ListItemSecondaryAction onClick={onClicksecondaryAction}>
+              <IconButton className={classes.icon} edge="end">
+                {iconSecondaryAction}
+              </IconButton>
+            </ListItemSecondaryAction>
+          )}
         </ListItem>
       </Tooltip>
     </Paper>

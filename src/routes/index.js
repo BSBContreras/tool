@@ -1,5 +1,6 @@
 import api from '../services/api';
-import { STORE_ERROR, SUCCESS } from '../constants';
+import axios from 'axios';
+import { STORE_ERROR, RUNTIME_ERROR, CANCEL, SUCCESS } from '../constants';
 
 export const storeManager = (store) => {
   return new Promise(async (res, rej) => {
@@ -27,6 +28,19 @@ export const loginManager = (store) => {
   });
 }
 
+export const storeEvaluation = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/assessments/store.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
 export const storeQuestionnaire = (store) => {
   return new Promise(async (res, rej) => {
     const response = await api.post('/questionnaires/store.php', store);
@@ -38,6 +52,54 @@ export const storeQuestionnaire = (store) => {
       rej(data.docs);
     }
   });
+}
+
+export const storeDesigner = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/designers/store.php', store);
+    
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const storeWebsite = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/websites/store.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadDesignersByEmail = (store) => {
+  return new Promise(async (res, rej) => {
+    const source = axios.CancelToken.source();
+    try {
+      const response = await api.post('/designers/search.php', { ...store, cancelToken: source.token });
+
+      const { data } = response;
+      if(data.status === SUCCESS) {
+        res(data.docs);
+      } else {
+        rej(data.docs);
+      }
+    } catch(error) {
+      if(axios.isCancel(error)) {
+        rej({ id: CANCEL, detail: 'Canceled by token' });
+      } else {
+        rej({ id: RUNTIME_ERROR, detail: 'Error on load designers' });
+      }
+    }
+  })
 }
 
 export const loadQuestionnairesByManager = (store) => {
@@ -95,6 +157,32 @@ export const loadTasksByWebsite = (store) => {
 export const loadQuestionsByQuestionnaire = (store) => {
   return new Promise(async (res, rej) => {
     const response = await api.post('/questionnaires/questions.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadEvaluatorsByProfile = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/profiles/evaluators.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadProfiles = () => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/profiles/index.php');
 
     const { data } = response;
     if(data.status === SUCCESS) {

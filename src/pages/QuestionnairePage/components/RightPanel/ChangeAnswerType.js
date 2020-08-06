@@ -72,6 +72,7 @@ export default function ChangeAnswerType({ question, handleClose }) {
       submitText="Change Answer Type"
       handleClose={handleClose}
       submit={handleClose}
+      maxWidth="md"
     >
       <List className={classes.root}>
         {answerTypes.map((answerType, index) => (

@@ -75,6 +75,9 @@ export default function AssessmentList() {
   const { managerController } = useContext(GlobalContext);
   const [ manager ] = managerController;
 
+  const { currentAssessmentController } = useContext(AssessmentContext);
+  const [ currentAssessment ] = currentAssessmentController;
+
   const [assessments, setAssessments] = useState([]);
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export default function AssessmentList() {
       }
 
     })
-  }, [manager]);
+  }, [manager, currentAssessment]);
 
   return (
     <List component="nav">

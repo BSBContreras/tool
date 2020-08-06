@@ -3,6 +3,11 @@ export const validateEmail = (email) => {
   return reg.test(String(email).toLowerCase());
 }
 
+export const validateUrl = (url) => {
+  const reg = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/g;
+  return reg.test(String(url).toLowerCase());
+}
+
 export const validateName = (name, min) => {
   if(name.length < min) {
     return false;

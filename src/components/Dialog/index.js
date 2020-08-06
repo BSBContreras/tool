@@ -26,7 +26,7 @@ const DialogTitle = withStyles(styles)((props) => {
   const { children, classes, onClose, ...other } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
-      <Typography variant="h6">{children}</Typography>
+      <Typography variant="h6" noWrap>{children}</Typography>
       {onClose ? (
         <IconButton className={classes.closeButton} onClick={onClose}>
           <CloseIcon />
@@ -55,7 +55,6 @@ export default function DefaultDialog({
   children,
   submit,
   submitText,
-  fullWidth,
   maxWidth
 }) {
   const useStyles = makeStyles(theme => ({
@@ -68,10 +67,10 @@ export default function DefaultDialog({
   const classes = useStyles();
 
   return (
-    <Dialog 
+    <Dialog
       open
+      fullWidth
       onClose={handleClose}  
-      fullWidth={fullWidth}
       maxWidth={maxWidth || 'lg'}
     >
       <DialogTitle onClose={handleClose}>{title}</DialogTitle>

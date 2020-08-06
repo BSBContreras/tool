@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Show from './show';
-import Create from './create';
+import CreateEvaluation from './CreateEvaluation';
 import CreateAssessmentProvider from '../../context/CreateAssessmentContext';
 import { AssessmentContext } from '../../context/AssessmentContext';
 
@@ -13,7 +13,7 @@ export default function RightPanel() {
     'show': <Show />,
     'create': 
     <CreateAssessmentProvider>
-      <Create />
+      <CreateEvaluation />
     </CreateAssessmentProvider>
   }
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import api from '../../../../services/api';
 import { CreateAssessmentContext } from '../../context/CreateAssessmentContext';
 import { AssessmentContext } from '../../context/AssessmentContext';
 import CompletedStepsSvg from '../../../../assets/completed_steps.svg';
@@ -12,13 +11,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip'
 import Grid from '@material-ui/core/Grid'
-import Paper from '@material-ui/core/Paper';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import MuiAlert from '@material-ui/lab/Alert';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -32,7 +25,10 @@ import {
   loadQuestionnairesByManager, 
   loadQuestionsByQuestionnaire, 
   loadWebsitesByManager,
-  loadTasksByWebsite
+  loadTasksByWebsite,
+  loadEvaluatorsByProfile,
+  loadProfiles,
+  storeEvaluation
 } from '../../../../routes';
 
 const Divider = ({...props}) => <hr {...props}></hr>
@@ -140,7 +136,7 @@ const ListQuestionnaires = () => {
       manager_id: Number(manager.id)
     }).then(data => {
 
-      setQuestionnaires(data.available);
+      setQuestionnaires([...data.available, ...data.unavailable]);
     }).catch(error => {
 
       if(Number(error.id) !== RUNTIME_ERROR) {
@@ -167,6 +163,7 @@ const ListQuestionnaires = () => {
           secondaryText={questionnaire.detail}
           tooltipText={questionnaire.detail}
           onClick={() => handleSelectQuestionnaire(questionnaire)}
+          active={questionnaire === selectedQuestionnaire}
         />
       ))}
     </List>
@@ -330,8 +327,6 @@ const TaskItem = ({ task }) => {
     }
   }
 
-  console.log(task)
-
   return (
     <Grid item sm={6}>
       <ListItemDefault
@@ -407,10 +402,6 @@ const ChooseGroups = () => {
       overflowY: 'auto',
       padding: 10, 
     },
-    paper: {
-      background: 'linear-gradient(45deg, #2196F3 90%, #99FF99 30%)',
-      margin: theme.spacing(1)
-    },
     chip: {
       marginTop: theme.spacing(1), 
       marginRight: theme.spacing(1) 
@@ -423,31 +414,12 @@ const ChooseGroups = () => {
     header: {
       color: '#777'
     },
-    icon: {
-      color: '#FFF'
-    },
-    name: {
-      color: '#FFF' 
-    },
-    detail: {
-      color: '#FFF' 
-    }
   }));
 
   const { userListController } = useContext(CreateAssessmentContext);
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [userList, setUserList] = userListController;
-
-  const loadProfiles = async () => {
-    const response = await api.post('/profiles/index.php');
-    const { data } = response;
-    if(data.status === 'success') {
-      setProfiles(data.docs);
-    } else {
-      alert('Error on load profiles');
-    }
-  }
 
   const union = (oldUsers, newUsers, newProfile_id) => {
     if(oldUsers.length === 0) {
@@ -472,15 +444,21 @@ const ChooseGroups = () => {
     ]
   }
 
-  const loadUsers = async (id) => {
-    const response = await api.post('/profiles/evaluators.php', { id: Number(id) });
-    const { data } = response;
-    if(data.status === 'success') {
-      const newUsers = data.docs;
-      setUserList(union(userList, newUsers, id));
-    } else {
-      alert('Error on load evaluators');
-    }
+  const loadEvaluators = async (id) => {
+    loadEvaluatorsByProfile({
+      id: Number(id)
+    }).then(data => {
+
+      setUserList(union(userList, data, id));
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Evaluators');
+      }
+
+    })
   }
 
   const updateUsers = (id) => {
@@ -494,12 +472,23 @@ const ChooseGroups = () => {
   }
 
   useEffect(() => {
-    loadProfiles();
+    loadProfiles().then(data => {
+
+      setProfiles(data);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Profiles');
+      }
+
+    });
   }, []);
 
   const handleSelectetProfile = (newProfile) => {
     if(!newProfile) return;
-    loadUsers(newProfile.id);
+    loadEvaluators(newProfile.id);
     setSelectedProfiles([...selectedProfiles, newProfile]);
     setProfiles(profiles.filter(profile => profile.id !== newProfile.id));
   }
@@ -512,6 +501,14 @@ const ChooseGroups = () => {
 
   const handleRemoveUser = (oldUser) => {
     setUserList(userList.filter(user => user.id !== oldUser.id));
+  }
+
+  const handleOpenAddEvaluator = () => {
+
+  }
+
+  const handleCloseAddEvaluator = () => {
+    
   }
 
   const classes = useStyles();
@@ -535,21 +532,15 @@ const ChooseGroups = () => {
           <Grid container>
             {selectedProfiles.map(profile => (
               <Grid key={profile.id} item sm={4}>
-                <Paper className={classes.paper}>
-                  <Tooltip title={profile.detail || 'No details'} arrow placement="top">
-                    <ListItem>
-                      <ListItemText 
-                        primary={<Typography className={classes.name}>{profile.name}</Typography>}
-                        secondary={<Typography className={classes.detail} noWrap>{profile.detail}</Typography>}
-                      />
-                      <ListItemSecondaryAction onClick={() => handleRemoveProfile(profile)}>
-                        <IconButton edge="end">
-                          <CancelIcon className={classes.icon} />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </Tooltip>
-                </Paper>
+                <ListItemDefault
+                  primaryText={profile.name}
+                  secondaryText={profile.detail}
+                  tooltipText={profile.detail}
+                  onClick={() => handleRemoveProfile(profile)}
+                  onClicksecondaryAction={() => handleRemoveProfile(profile)}
+                  iconSecondaryAction={<CancelIcon />}
+                  active
+                />
               </Grid>
             ))}
           </Grid>
@@ -562,7 +553,7 @@ const ChooseGroups = () => {
         <Divider />
         <Chip
           className={classes.chipAdd}
-          onClick={() => alert('Add')}
+          onClick={handleOpenAddEvaluator}
           label="Add user"
           icon={<AddIcon />}
         />
@@ -576,6 +567,7 @@ const ChooseGroups = () => {
           />
         ))}
       </List>
+      {/* <AddEvaluator handleClose={handleCloseAddEvaluator} /> */}
     </div>
   );
 }
@@ -590,22 +582,12 @@ const Confimation = () => {
       overflowY: 'auto',
       padding: 10,
     },
-    paper: {
-      background: 'linear-gradient(45deg, #2196F3 90%, #21CBF3 30%)',
-      margin: theme.spacing(1)
-    },
     header: {
       color: '#777'
     },
     value: {
       color: '#333'
     },
-    name: {
-      color: '#FFF' 
-    },
-    detail: {
-      color: '#DDD' 
-    }
   }))
 
   const controller = useContext(CreateAssessmentContext);
@@ -637,9 +619,6 @@ const Confimation = () => {
       <Typography className={classes.value} variant="subtitle1" component="p">
         Details: {questionnaire.detail}
       </Typography>
-      <Typography className={classes.value} variant="body2" component="p">
-        Number of questions : {questionnaire.questions}
-      </Typography>
       <Divider />
       <List component="nav">
         <Typography variant="body1" align="center" className={classes.header}>
@@ -648,16 +627,12 @@ const Confimation = () => {
         <Grid container>
           {tasks.map(task => (
             <Grid key={task.id} item sm={4}>
-              <Paper className={classes.paper}>
-                <Tooltip title={task.detail || 'No details'} arrow placement="top">
-                  <ListItem>
-                    <ListItemText 
-                      primary={<Typography className={classes.name}>{task.name}</Typography>}
-                      secondary={<Typography className={classes.detail} variant="subtitle2" noWrap>{task.detail}</Typography>}
-                    />
-                  </ListItem>
-                </Tooltip>
-              </Paper>
+              <ListItemDefault
+                primaryText={task.name}
+                secondaryText={task.detail}
+                tooltipText={task.detail}
+                onClick={() => {}}
+              />
             </Grid>
           ))}
         </Grid>
@@ -670,16 +645,12 @@ const Confimation = () => {
         <Grid container>
           {evaluators.map(evaluator => (
             <Grid key={evaluator.id} item sm={4}>
-              <Paper className={classes.paper}>
-                <Tooltip title={evaluator.email || 'No details'} arrow placement="top">
-                  <ListItem>
-                    <ListItemText 
-                      primary={<Typography className={classes.name}>{evaluator.name}</Typography>}
-                      secondary={<Typography className={classes.detail} variant="subtitle2" noWrap>{evaluator.email}</Typography>}
-                    />
-                  </ListItem>
-                </Tooltip>
-              </Paper>
+              <ListItemDefault
+                primaryText={evaluator.name}
+                secondaryText={evaluator.email}
+                tooltipText={evaluator.email}
+                onClick={() => {}}
+              />
             </Grid>
           ))}
         </Grid>
@@ -688,7 +659,7 @@ const Confimation = () => {
   )
 }
 
-export default function StepperView() {
+export default function CreateEvaluation() {
   const useStyles = makeStyles(theme => ({
     root: {
       width: '100%',
@@ -727,13 +698,17 @@ export default function StepperView() {
   
   const getSteps = () => {
     return [
-      'Enter name and details about your assessment', 
+      'Enter name and details about your evaluation', 
       'Choose the tasks to be evaluated',
       'Choose a questionnaire', 
       'Choose evaluators',
       'Confimation'
     ];
   }
+
+  const { viewController, currentAssessmentController } = useContext(AssessmentContext);
+  const [ currentEvaluation, setCurrentEvaluation ] = currentAssessmentController;
+  const [ view, setView ] = viewController;
 
   const controller = useContext(CreateAssessmentContext);
   const [ details ] = controller.detailsController;
@@ -780,9 +755,6 @@ export default function StepperView() {
 
   const Alert = (props) => <MuiAlert elevation={6} variant="filled" {...props} />;
 
-  const { viewController } = useContext(AssessmentContext);
-  const [ view, setView ] = viewController;
-
   const [dataSnackbar, setDataSnackbar] = useState({
     open: false,
     severity: 'success',
@@ -810,25 +782,31 @@ export default function StepperView() {
     }
   };
 
-  const storeAssessment = async (info) => {
-    const response = await api.post('/assessments/store.php', info);
-    const { data } = response;
-    if(data.status === 'success') {
-      handleOpenSnackbar('success', 'You have successfully created the Assessment!');
-    } else {
-      handleOpenSnackbar('error', 'The Assessment was not created');
-    }
-  }
-
   const handleConfirm = () => {
-    storeAssessment({
+    storeEvaluation({
       name: details.name,
       detail: details.detail,
       questionnaire_id: Number(questionnaire.id),
       tasks_id: tasks.map(task => Number(task.id)),
       evaluators_id: evaluators.map(evaluator => Number(evaluator.id))
+    }).then(data => {
+
+      if(currentEvaluation.id !== data.id) {
+        setCurrentEvaluation(data);
+      }
+      handleOpenSnackbar('success', 'You have successfully created the Evaluation!');
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        handleOpenSnackbar('error', error.detail);
+      } else {
+        handleOpenSnackbar('error', 'The Evaluation was not created');
+      }
+
+    }).finally(() => {
+
+      handleNext();
     })
-    handleNext();
   }
 
   const classes = useStyles();

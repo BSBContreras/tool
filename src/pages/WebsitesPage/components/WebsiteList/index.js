@@ -56,7 +56,7 @@ const CreateWebsite = () => {
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>
-      <CreateWebsiteDialog open={open} handleClose={handleClose} />
+      {open && <CreateWebsiteDialog handleClose={handleClose} />}
     </div>
   );
 }

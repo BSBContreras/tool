@@ -450,7 +450,7 @@ const Constructor = () => {
           >
             Click here to create a new task
           </Typography>
-          <CreateWebsiteDialog open={openDialog} handleClose={handleCloseDialog} />
+          <CreateTaskDialog open={openDialog} handleClose={handleCloseDialog} />
         </div>
       )}
     </List>
@@ -520,7 +520,7 @@ export default function RightPanel() {
           >
             Or Click here to add a New Website
           </Typography>
-          <CreateWebsiteDialog open={openDialog} handleClose={handleCloseDialog} />
+          {openDialog && <CreateWebsiteDialog handleClose={handleCloseDialog} />}
         </div>
       )}
     </Grid>
