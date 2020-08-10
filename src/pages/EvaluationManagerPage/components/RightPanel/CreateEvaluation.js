@@ -18,6 +18,8 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/AddCircle';
 import Snackbar from '@material-ui/core/Snackbar';
 
+import AddEvaluator from './AddEvaluator';
+
 import ListItemDefault from '../../../../components/ListItemDefault';
 import { GlobalContext } from '../../../../context/GlobalContext';
 import { RUNTIME_ERROR } from '../../../../constants';
@@ -359,10 +361,10 @@ const TaskList = ({ website }) => {
   useEffect(() => {
     if(website.id) {
       loadTasksByWebsite({
-        id: Number(website.id)
+        website_id: Number(website.id)
       }).then(data => {
-  
-        setTasks(data);
+        
+        setTasks([...data.available, ...data.unavailable]);
       }).catch(error => {
   
         if(Number(error.id) !== RUNTIME_ERROR) {
@@ -420,8 +422,13 @@ const ChooseGroups = () => {
   const [selectedProfiles, setSelectedProfiles] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [userList, setUserList] = userListController;
+  const [openAddEvaluator, setOpenAddEvaluator] = useState(false);
 
   const union = (oldUsers, newUsers, newProfile_id) => {
+    if(!newProfile_id) {
+      return [...oldUsers, {...newUsers, profile_ids: [0], count: Infinity }];
+    }
+
     if(oldUsers.length === 0) {
       return newUsers.map(user => ({...user, profile_ids: [newProfile_id], count: 1}))
     }
@@ -503,12 +510,18 @@ const ChooseGroups = () => {
     setUserList(userList.filter(user => user.id !== oldUser.id));
   }
 
-  const handleOpenAddEvaluator = () => {
+  const handleAddUser = (newUser) => {
+    if(!userList.some(user => user.id === newUser.id)) {
+      setUserList(union(userList, newUser));
+    }
+  }
 
+  const handleOpenAddEvaluator = () => {
+    setOpenAddEvaluator(true);
   }
 
   const handleCloseAddEvaluator = () => {
-    
+    setOpenAddEvaluator(false);
   }
 
   const classes = useStyles();
@@ -554,7 +567,7 @@ const ChooseGroups = () => {
         <Chip
           className={classes.chipAdd}
           onClick={handleOpenAddEvaluator}
-          label="Add user"
+          label="Add Evaluator"
           icon={<AddIcon />}
         />
         {userList.map(user => (
@@ -567,7 +580,7 @@ const ChooseGroups = () => {
           />
         ))}
       </List>
-      {/* <AddEvaluator handleClose={handleCloseAddEvaluator} /> */}
+      {openAddEvaluator && <AddEvaluator handleClose={handleCloseAddEvaluator} handleAdd={handleAddUser} />}
     </div>
   );
 }
@@ -742,7 +755,7 @@ export default function CreateEvaluation() {
     }
   }
 
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(3);
   const steps = getSteps();
 
   const handleNext = () => {
@@ -756,9 +769,9 @@ export default function CreateEvaluation() {
   const Alert = (props) => <MuiAlert elevation={6} variant="filled" {...props} />;
 
   const [dataSnackbar, setDataSnackbar] = useState({
-    open: false,
-    severity: 'success',
-    message: "it's alright is okay"
+    open: Boolean(currentEvaluation.id),
+    severity: 'warning',
+    message: `Make sure the changes to the evaluation "${currentEvaluation.name}" have been saved`
   });
 
   const handleOpenSnackbar = (severity, message) => {
@@ -791,9 +804,8 @@ export default function CreateEvaluation() {
       evaluators_id: evaluators.map(evaluator => Number(evaluator.id))
     }).then(data => {
 
-      if(currentEvaluation.id !== data.id) {
-        setCurrentEvaluation(data);
-      }
+      setCurrentEvaluation(data);
+
       handleOpenSnackbar('success', 'You have successfully created the Evaluation!');
     }).catch(error => {
 

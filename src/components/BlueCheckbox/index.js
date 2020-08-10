@@ -7,9 +7,6 @@ import { withStyles } from '@material-ui/core/styles';
 const BlueCheckbox = withStyles({
   root: {
     color: '#22ACF0',
-    '&$checked': {
-      color: 'white',
-    }
   }
 })(({children, className, ...props}) => 
   <FormControlLabel 

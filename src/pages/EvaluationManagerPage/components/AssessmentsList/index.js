@@ -42,16 +42,12 @@ const AssessmentItem = ({ assessment }) => {
 
 const CreateAssessment = () => {
 
-  const { currentAssessmentController, viewController } = useContext(AssessmentContext);
-  const [currentAssessment, setCurrentAssessment] = currentAssessmentController;
+  const { viewController } = useContext(AssessmentContext);
   const [view, setView] = viewController;
 
   const handleAddAssessment = () => {
     if(view !== 'create') {
       setView('create');
-      if(currentAssessment !== null) {
-        setCurrentAssessment(null);
-      }
     }
   };
 

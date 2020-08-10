@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import api from '../../../../services/api';
+import { loadWebsitesByManager } from '../../../../routes';
+import { GlobalContext } from '../../../../context/GlobalContext';
+import { RUNTIME_ERROR } from '../../../../constants';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import CreateWebsiteDialog from './create';
 import List from '@material-ui/core/List';
@@ -67,23 +69,25 @@ export default function WebsiteList() {
   const { websiteController } = useContext(WebsiteContext);
   const [ currentWebsite ] = websiteController;
 
-  const loadWebsites = async () => {
-    const response = await api.post('/websites/index.php');
-    const { data } = response;
-    if(data.status === 'success') {
-      setWebsites(data.docs);
-    } else {
-      alert('Error on load websites');
-    }
-  }
+  const { managerController } = useContext(GlobalContext);
+  const [ manager ] = managerController;
 
   useEffect(() => {
-    loadWebsites();
-  }, []);
+    loadWebsitesByManager({
+      manager_id: Number(manager.id)
+    }).then(data => {
 
-  useEffect(() => {
-    loadWebsites();
-  }, [currentWebsite])
+      setWebsites(data);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Websites');
+      }
+
+    })
+  }, [currentWebsite, manager])
 
   return (
     <List component="nav" style={{ height: 635, overflowY: 'auto' }}>

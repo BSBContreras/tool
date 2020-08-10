@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import api from '../../../../services/api';
 import SelectWebsiteSvg from '../../../../assets/select_website.svg';
@@ -21,6 +21,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import { TaskContext } from '../../context/TaskContext';
 import TaskProvider from '../../context/TaskContext';
+
+import { loadTasksByWebsite } from '../../../../routes';
+import { RUNTIME_ERROR } from '../../../../constants';
 
 const TaskAdd = () => {
   const [open, setOpen] = useState(false);
@@ -90,52 +93,36 @@ const TaskList = ({ website }) => {
   const [ newTaskAdd, setNewTaskAdd ] = newTaskAddController;
 
   const [availableTasks, setAvailableTasks] = useState([]);
+  const [unavailableTasks, setUnvailableTasks] = useState([]);
 
-  const loadTasks = async (id) => {
-    const response = await api.post('/websites/tasks.php', { id: Number(id) });
-    const { data } = response;
-    if(data.status === 'success') {
-      setAvailableTasks(data.docs);
-    } else {
-      alert('Error on load tasks');
-    }
-  }
+  const loadTasks = useCallback(() => {
+    loadTasksByWebsite({
+      website_id: Number(website.id)
+    }).then(data => {
 
-  useEffect(() => {
-    if(website.id) {
-      loadTasks(website.id);
-    }
+      setAvailableTasks(data.available);
+      setUnvailableTasks(data.unavailable);
+    }).catch(error => {
+      console.log(error);
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Tasks');
+      }
+
+    })
   }, [website])
 
   useEffect(() => {
-    if(newTaskAdd && website.id) {
-      loadTasks(website.id);
+    loadTasks();
+  }, [loadTasks])
+
+  useEffect(() => {
+    if(newTaskAdd) {
+      loadTasks();
       setNewTaskAdd(false);
     }
-  }, [newTaskAdd, website, setNewTaskAdd])
-
-  const unavailableTasks = [
-    {
-      id: 50,
-      name: 'Task static 1',
-      detail: 'Static read-only task example 1'
-    },
-    {
-      id: 51,
-      name: 'Task static 2',
-      detail: 'Static read-only task example 2'
-    },
-    {
-      id: 52,
-      name: 'Task static 3',
-      detail: 'Static read-only task example 3'
-    },
-    {
-      id: 53,
-      name: 'Task static 4',
-      detail: 'Static read-only task example 4'
-    },
-  ]
+  }, [newTaskAdd, loadTasks, setNewTaskAdd]);
 
   return (
     <List 

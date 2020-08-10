@@ -67,6 +67,23 @@ export const storeDesigner = (store) => {
   });
 }
 
+export const storeEvaluator = (store) => {
+  return new Promise(async (res, rej) => {
+    // const response = await api.post('/designers/store.php', store);
+    // const response = { data: { status: SUCCESS, docs: { id: 999, name: store.name, email: store.email }}};
+    const response = { data: { status: 'error', docs: { id: 5, detail: 'this email already registred' }}};
+    
+    console.log(store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
 export const storeWebsite = (store) => {
   return new Promise(async (res, rej) => {
     const response = await api.post('/websites/store.php', store);
@@ -80,9 +97,33 @@ export const storeWebsite = (store) => {
   });
 }
 
+export const loadEvaluatorsByEmail = (store) => {
+  return new Promise(async (res, rej) => {
+    const source = axios.CancelToken.source();
+
+    try {
+      const response = await api.post('/designers/search.php', { ...store, cancelToken: source.token });
+
+      const { data } = response;
+      if(data.status === SUCCESS) {
+        res(data.docs);
+      } else {
+        rej(data.docs);
+      }
+    } catch(error) {
+      if(axios.isCancel(error)) {
+        rej({ id: CANCEL, detail: 'Canceled by token' });
+      } else {
+        rej({ id: RUNTIME_ERROR, detail: 'Error on load designers' });
+      }
+    }
+  })
+}
+
 export const loadDesignersByEmail = (store) => {
   return new Promise(async (res, rej) => {
     const source = axios.CancelToken.source();
+
     try {
       const response = await api.post('/designers/search.php', { ...store, cancelToken: source.token });
 
@@ -130,7 +171,7 @@ export const loadEvaluationsByManager = (store) => {
 
 export const loadWebsitesByManager = (store) => {
   return new Promise(async (res, rej) => {
-    const response = await api.post('/websites/index.php', store);
+    const response = await api.post('/managers/websites.php', store);
 
     const { data } = response;
     if(data.status === SUCCESS) {

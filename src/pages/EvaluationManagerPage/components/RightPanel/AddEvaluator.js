@@ -1,30 +1,27 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { WebsiteContext } from '../../context/WebsiteContext';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 import Collapse from '@material-ui/core/Collapse';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
+import { makeStyles } from '@material-ui/core/styles';
 
-import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 
-import { makeStyles } from '@material-ui/core/styles';
-
-import { storeWebsite, storeDesigner, loadDesignersByEmail } from '../../../../routes';
-
-import AlertMessage from '../../../../components/AlertMessage';
 import Dialog from '../../../../components/Dialog';
+import AlertMessage from '../../../../components/AlertMessage';
 import ListItemDefault from '../../../../components/ListItemDefault';
+import BlueCheckbox from '../../../../components/BlueCheckbox';
 import Button from '../../../../components/Button';
 
+import { loadEvaluatorsByEmail, loadProfiles, storeEvaluator } from '../../../../routes';
+
 import { RUNTIME_ERROR, CANCEL } from '../../../../constants';
-import { validateUrl, validateEmail, validateName } from '../../../../utils';
-import { GlobalContext } from '../../../../context/GlobalContext';
+import { validateEmail, validateName } from '../../../../utils';
 
 const useStyles = makeStyles(theme => ({
   textfield: {
@@ -52,12 +49,14 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     marginTop: theme.spacing(1.5)
   }
-}));
+}))
 
-const CreateDesigner = ({ handleClose, createDesigner }) => {
+const CreateEvaluator = ({ handleClose, createEvaluator }) => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [profiles, setProfiles] = useState([]);
+  const [selecteds, setSelecteds] = useState([]);
   const [errors, setErrors] = useState([]);
 
   const handleChageName = event => {
@@ -69,6 +68,30 @@ const CreateDesigner = ({ handleClose, createDesigner }) => {
     const { value } = event.target;
     value.length <= 150 && setEmail(value);
   }
+
+  const handleClickProfile = (event, newProfile) => {
+    const { checked } = event.target;
+    if(checked) {
+      setSelecteds(prev => [...prev, newProfile]);
+    } else {
+      setSelecteds(prev => prev.filter(profile => profile.id !== newProfile.id));
+    }
+  }
+
+  useEffect(() => {
+    loadProfiles().then(data => {
+
+      setProfiles(prev => [...prev, ...data]);
+    }).catch(error => {
+
+      if(Number(error.id) !== RUNTIME_ERROR) {
+        alert(error.detail);
+      } else {
+        alert('Error on load Profiles');
+      }
+
+    })
+  }, [])
 
   const withoutErrors = () => {
     const errors = [];
@@ -84,17 +107,19 @@ const CreateDesigner = ({ handleClose, createDesigner }) => {
 
   const submit = () => {
     if(withoutErrors()) {
-      storeDesigner({
-        name, email
+      storeEvaluator({
+        name, email,
+        profiles_ids: selecteds.map(profile => Number(profile.id))
       }).then(data => {
 
-        createDesigner(data);
+        createEvaluator(data);
+        handleClose();
       }).catch(error => {
 
         if(Number(error.id) !== RUNTIME_ERROR) {
           setErrors([error.detail]);
         } else {
-          alert('Error on load Profiles');
+          alert('Error on create evaluator');
         }
 
       })
@@ -103,10 +128,10 @@ const CreateDesigner = ({ handleClose, createDesigner }) => {
 
   const classes = useStyles();
 
-  return(
+  return (
     <form onSubmit={e => { e.preventDefault(); submit(); }}>
       <div className={classes.header}>
-        <Typography variant="body1" noWrap>Create Designer</Typography>
+        <Typography variant="body1" noWrap>Create Evaluator</Typography>
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
@@ -114,81 +139,58 @@ const CreateDesigner = ({ handleClose, createDesigner }) => {
       <AlertMessage open={errors.length > 0} type="error">
         {errors.join(', ')}
       </AlertMessage>
-      <Typography className={classes.textfield} gutterBottom> Designer Name </Typography>
+      <Typography className={classes.textfield} gutterBottom> Evaluator Name </Typography>
       <TextField 
-        id="name_designer" 
-        label="Designer Name" 
+        id="name_evaluator" 
+        label="Evaluator Name" 
         variant="outlined"
         value={name}
         fullWidth
         onChange={handleChageName}
       />
-      <Typography className={classes.textfield} gutterBottom> Designer Email </Typography>
+      <Typography className={classes.textfield} gutterBottom> Evaluator Email </Typography>
       <TextField 
-        id="email_designer" 
-        label="Designer Email" 
+        id="email_evaluator" 
+        label="Evaluator Email" 
         variant="outlined"
         type="email"
         value={email}
         fullWidth
         onChange={handleChageEmail}
       />
+      <Typography className={classes.textfield} gutterBottom> Profiles </Typography>
+      <Grid container>
+        {profiles.map(profile => (
+          <Grid key={profile.id} item sm={4}>
+            <BlueCheckbox onClick={e => handleClickProfile(e, profile)}>
+              {profile.name}
+            </BlueCheckbox>
+          </Grid>
+        ))}
+      </Grid>
       <Button
         className={classes.textfield}
         type="submit"
       >
-        Create Designer
+        Create evaluator
       </Button>
     </form>
-  );
+  )
 }
 
-export default function CreateWebsite({ handleClose }) {
-  const { websiteController } = useContext(WebsiteContext);
-  const [currentWebsite, setCurrentWebsite] = websiteController;
+export default function AddEvaluation({ handleClose, handleAdd }) {
 
-  const { managerController } = useContext(GlobalContext);
-  const [ manager ] = managerController;
-
-  const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-  const [designers, setDesigners] = useState([]);
-  const [designer, setDesigner] = useState({});
+  const [evaluators, setEvaluators] = useState([]);
+  const [evaluator, setEvaluator] = useState({});
   const [errors, setErrors] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [openCreateDesigner, setOpenCreateDesigner] = useState(false);
- 
-  const validName = name => name.length >= 3 ? true : false;
-  const validDesigner = designer => designer.id ? true : false;
+  const [openCreateEvaluator, setOpenCreateEvaluator] = useState(false);
 
-  const handleChageName = event => {
+  const handleChangeSearch = (event) => {
     const { value } = event.target;
-    value.length <= 100 && setName(value);
-  }
-
-  const handleChageUrl = event => {
-    const { value } = event.target;
-    value.length <= 150 && setUrl(value);
-  }
-
-  const handleChangeDesigner = designer => {
-    setDesigner(designer);
-  }
-
-  const handleOpenCreateDesigner = () => {
-    setOpenCreateDesigner(true);
-  }
-
-  const handleCloseCreateDesigner = () => {
-    setOpenCreateDesigner(false);
-  }
-
-  const handleChangeSearch = event => {
-
-    const query = event.target.value;
     setLoading(true);
-    setQuery(query);
+    setQuery(value);
   }
 
   useEffect(() => {
@@ -196,12 +198,12 @@ export default function CreateWebsite({ handleClose }) {
     if(query.length < 5) {
       return;
     }
-
-    loadDesignersByEmail({
+    
+    loadEvaluatorsByEmail({
       query
     }).then(data => {
 
-      setDesigners(data);
+      setEvaluators(data);
     }).catch(error => {
 
       if(Number(error.id) === CANCEL) {
@@ -220,49 +222,39 @@ export default function CreateWebsite({ handleClose }) {
     })
   }, [query])
 
-  const createDesigner = designer => {
-    setLoading(true);
-    setQuery(designer.email);
-    setDesigner(designer);
-    handleCloseCreateDesigner();
+  const handleOpenCreateEvaluator = () => {
+    setOpenCreateEvaluator(true);
   }
+
+  const handleCloseCreateEvaluator = () => {
+    setOpenCreateEvaluator(false);
+  }
+
+  const handleChangeEvaluator = evaluator => {
+    setEvaluator(evaluator);
+  }
+
+  const createEvaluator = (evaluator) => {
+    setLoading(true);
+    setQuery(evaluator.email);
+    setEvaluator(evaluator);
+  }
+
+  const validateEvaluator = evaluator => evaluator.id ? true : false;
 
   const withoutErrors = () => {
     const errors = [];
-    if(!validName(name)) {
-      errors.push('Please enter a name with at least 3 characters')
-    }
-    if(!validateUrl(url)) {
-      errors.push('Please enter a valid address');
-    }
-    if(!validDesigner(designer)) {
-      errors.push('Please select a designer')
+    if(!validateEvaluator(evaluator)) {
+      errors.push('Please select some evaluator')
     }
     setErrors(errors);
     return errors.length === 0;
   }
-
+  
   const submit = () => {
     if(withoutErrors()) {
-      storeWebsite({
-        name, url,
-        designer_id: Number(designer.id),
-        manager_id: Number(manager.id)
-      }).then(data => {
-
-        setCurrentWebsite(data);
-      }).catch(error => {
-
-        if(Number(error.id) !== RUNTIME_ERROR) {
-          alert(error.detail);
-        } else {
-          alert('Error on store website');
-        }
-
-      }).finally(() => {
-
-        handleClose();
-      });
+      handleAdd(evaluator);
+      handleClose();
     }
   }
 
@@ -270,48 +262,26 @@ export default function CreateWebsite({ handleClose }) {
 
   return (
     <Dialog
-      title="Add Website"
-      submitText="Add Website"
       handleClose={handleClose}
+      title="Add Evaluator"
+      submitText="Add Evaluator"
       submit={submit}
       maxWidth="sm"
     >
-      <AlertMessage open={currentWebsite.id} type="warning">
-        Make sure the changes to the website "{currentWebsite.name}" have been saved
-      </AlertMessage>
       <AlertMessage open={errors.length > 0} type="error">
         {errors.join(', ')}
       </AlertMessage>
-      <Typography className={classes.textfield} gutterBottom> Website Name </Typography>
-      <TextField 
-        id="name_website" 
-        label="ex: USP website" 
-        variant="outlined"
-        value={name}
-        fullWidth
-        onChange={handleChageName}
-      />
-      <Typography className={classes.textfield} gutterBottom> Website address </Typography>
-      <TextField 
-        id="url_website" 
-        label="ex: https://www5.usp.br" 
-        variant="outlined"
-        type="url"
-        value={url}
-        fullWidth
-        onChange={handleChageUrl}
-      />
-      <Typography className={classes.textfield} gutterBottom> 
-        Designer{designer.name && `: "${designer.name}"`}
+      <Typography gutterBottom> 
+        Evaluator {evaluator.name && `: "${evaluator.name}"`}
       </Typography>
       <TextField 
-        id="designer" 
-        label="Designer Email / Name" 
+        id="Evaluator" 
+        label="Evaluator Email / Name" 
         variant="outlined"
         value={query}
         InputProps={{ endAdornment: 
           <InputAdornment position="end">
-            <IconButton onClick={handleOpenCreateDesigner}>
+            <IconButton onClick={handleOpenCreateEvaluator}>
               <AddIcon />
             </IconButton>
           </InputAdornment>,
@@ -327,17 +297,17 @@ export default function CreateWebsite({ handleClose }) {
           </span>
         </div>
       ) : (
-        designers.length > 0 ? (
+        evaluators.length > 0 ? (
           <List className={classes.textfield}>
             <Grid container>
-              {designers.map(item => (
+              {evaluators.map(item => (
                 <Grid key={item.id} item sm={6}>
                   <ListItemDefault
                     primaryText={item.name}
                     secondaryText={item.email}
                     tooltipText={item.email}
-                    onClick={() => handleChangeDesigner(item)}
-                    active={item.id === designer.id}
+                    onClick={() => handleChangeEvaluator(item)}
+                    active={item.id === evaluator.id}
                   />
                 </Grid>
               ))}
@@ -345,15 +315,14 @@ export default function CreateWebsite({ handleClose }) {
           </List>
         ) : (
           <Typography className={classes.textfield}> 
-            No designers found, type a valid email above or 
-            <span onClick={handleOpenCreateDesigner} className={classes.link}> click here </span> 
+            No evaluators found, type a valid email above or 
+            <span onClick={handleOpenCreateEvaluator} className={classes.link}> click here </span> 
             to add a new designer
           </Typography>
         )
       )}
-      {openCreateDesigner && <Divider />}
-      <Collapse in={openCreateDesigner}>
-        <CreateDesigner handleClose={handleCloseCreateDesigner} createDesigner={createDesigner} />
+      <Collapse in={openCreateEvaluator}>
+        <CreateEvaluator handleClose={handleCloseCreateEvaluator} createEvaluator={createEvaluator} />
       </Collapse>
     </Dialog>
   );
