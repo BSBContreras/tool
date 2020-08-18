@@ -120,16 +120,12 @@ export default function CreatePage({ open, handleClose }) {
   }
 
   const validName = name => name.length >= 3 ? true : false;
-  const validUrl = url => url[0] === '/' ? true : false;
-  const validEments = elements => elements.length < 5 ? true : false;
+  const validEments = elements => elements.length <= 5 ? true : false;
 
   const withoutErrors = () => {
     const errors = [];
     if(!validName(name)) {
       errors.push('Please enter a name with at least 3 characters')
-    }
-    if(!validUrl(url)) {
-      errors.push('Please enter a valid address, starts with "/"');
     }
     if(!validEments(selectedElements)) {
       errors.push('Select up to 5 elements');
