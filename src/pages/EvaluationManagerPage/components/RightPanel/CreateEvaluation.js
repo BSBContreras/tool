@@ -755,7 +755,7 @@ export default function CreateEvaluation() {
     }
   }
 
-  const [activeStep, setActiveStep] = useState(3);
+  const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
 
   const handleNext = () => {

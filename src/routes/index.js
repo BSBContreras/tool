@@ -69,11 +69,7 @@ export const storeDesigner = (store) => {
 
 export const storeEvaluator = (store) => {
   return new Promise(async (res, rej) => {
-    // const response = await api.post('/designers/store.php', store);
-    // const response = { data: { status: SUCCESS, docs: { id: 999, name: store.name, email: store.email }}};
-    const response = { data: { status: 'error', docs: { id: 5, detail: 'this email already registred' }}};
-    
-    console.log(store);
+    const response = await api.post('/evaluators/store.php', store);
 
     const { data } = response;
     if(data.status === SUCCESS) {
@@ -102,7 +98,7 @@ export const loadEvaluatorsByEmail = (store) => {
     const source = axios.CancelToken.source();
 
     try {
-      const response = await api.post('/designers/search.php', { ...store, cancelToken: source.token });
+      const response = await api.post('/evaluators/search.php', { ...store, cancelToken: source.token });
 
       const { data } = response;
       if(data.status === SUCCESS) {
