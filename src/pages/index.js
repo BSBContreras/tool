@@ -4,9 +4,33 @@ import QuestionnairePage from './QuestionnairePage';
 import EvaluationManagerPage from './EvaluationManagerPage';
 import WebsitesPage from './WebsitesPage';
 
-import { Header, Footer } from '../components/Layouts';
+import { Header } from '../components/Layouts';
 
 import { GlobalContext } from '../context/GlobalContext';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    height: '100%',
+  
+    display: 'grid',
+    gridTemplateColumns: '300px auto',
+    gridTemplateRows: '70px auto',
+    gridTemplateAreas: `
+      'HE HE'
+      'LI CO' 
+    `
+  },
+  list: {
+    gridArea: 'LI',
+    height: '100%',
+    borderRight: '1px solid lightgrey'
+  },
+  content: {
+    gridArea: 'CO',
+    height: '100%'
+  }
+}))
 
 export default function Pages() {
   const { managerController } = useContext(GlobalContext);
@@ -14,30 +38,31 @@ export default function Pages() {
 
   const [page, setPage] = useState('EvaluationManagerPage');
 
+  const classes = useStyles();
+
   const showPage = (pageName) => {
     switch (pageName) {
       case 'QuestionnairePage': 
-        return <QuestionnairePage />
+        return <QuestionnairePage classes={classes} />
       case 'EvaluationManagerPage':
-        return <EvaluationManagerPage />
+        return <EvaluationManagerPage classes={classes} />
       case 'WebsitesPage': 
-        return <WebsitesPage />
+        return <WebsitesPage classes={classes} />
       default: 
         return <div>404 page not found</div>
     }
   }
 
   return (
-    <div>
+    <>
       {manager.id ? (
-        <div>
+        <div className={classes.container}>
           <Header setPage={setPage} />
           {showPage(page)}
-          <Footer /> 
-        </div>
+        </div>          
       ) : (
         <LoginPage />
       )}
-    </div>
+    </>
   )
 }

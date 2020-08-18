@@ -11,6 +11,7 @@ import { makeStyles } from '@material-ui/core/styles';
 export default function Header({ setPage }) {
 	const useStyles = makeStyles(theme => ({
 		root: {
+			gridArea: 'HE',
 			flexGrow: 1,
 		},
 		menuButton: {
@@ -20,7 +21,10 @@ export default function Header({ setPage }) {
 			flexGrow: 1,
 		},
 		AppBar: {
-			background: theme.palette.primary
+			background: theme.palette.primary,
+			height: '100%',
+			display:'flex',
+			justifyContent: 'center',
 		}
 	}));
 
@@ -43,7 +47,7 @@ export default function Header({ setPage }) {
 
 		setManager({});
 
-		handleCloseMenu()
+		handleCloseMenu();
 	}
 
 	const classes = useStyles();

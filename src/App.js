@@ -5,6 +5,8 @@ import GlobalContext from './context/GlobalContext';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import { indigo } from '@material-ui/core/colors';
 
+import './styles/GlobalStyles.css'
+
 const theme = createMuiTheme({
   palette: {
     primary: {
