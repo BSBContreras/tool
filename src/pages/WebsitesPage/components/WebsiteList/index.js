@@ -90,10 +90,10 @@ export default function WebsiteList() {
   }, [currentWebsite, manager])
 
   return (
-    <List component="div" style={{ height: '100%', overflowY: 'auto' }}>
+    <List component="div" style={{ height:'100%' }} >
       <CreateWebsite />
-      {[...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites, ...websites].map((website,i) => (
-        <WebsiteItem key={i} website={website} button />
+      {websites.map(website => (
+        <WebsiteItem key={website.id} website={website} button />
       ))}
     </List>
   );

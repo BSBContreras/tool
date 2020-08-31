@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     gridArea: 'LI',
-    height: '100%',
+    overflowY: 'auto',
     borderRight: '1px solid lightgrey'
   },
   content: {

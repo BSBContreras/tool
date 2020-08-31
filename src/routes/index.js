@@ -93,6 +93,19 @@ export const storeWebsite = (store) => {
   });
 }
 
+export const loadEvaluatorsByEvaluation = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/assessments/evaluators.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
 export const loadEvaluatorsByEmail = (store) => {
   return new Promise(async (res, rej) => {
     const source = axios.CancelToken.source();

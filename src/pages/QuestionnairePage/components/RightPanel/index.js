@@ -8,26 +8,27 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default function RightPane() {
   const useStyles = makeStyles(theme => ({
-    title: {
-      color: '#444',
-      padding: theme.spacing(3),
-    },
     container: {
+      height: '100%',
+      width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center'
+      justifyContent: 'space-around',
+      alignItems: 'center'
+    },
+    title: {
+      color: '#444'
     },
     svg: {
-      display: 'block',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      maxWidth: '500px'
+      maxHeight: '350px'
     },
     link: {
-      color: theme.palette.link.blue, 
-      margin: theme.spacing(3), 
-      cursor: 'pointer'
-    }
+      color: theme.palette.primary.main,
+      cursor: 'pointer',
+      '&:hover': {
+        textDecoration: 'underline'
+      }
+    },
   }));
 
   const { questionnaireController } = useContext(QuestionnaireContext);
@@ -51,7 +52,6 @@ export default function RightPane() {
       <div className={classes.container}>
         <Typography 
           className={classes.title}
-          align="center" 
           variant="h4"
         >
           Select a questionnaire on the Left
@@ -63,7 +63,6 @@ export default function RightPane() {
         /> 
         <Typography 
           className={classes.link}
-          align="center" 
           variant="subtitle1"
           onClick={handleClickOpenDialog}
         >

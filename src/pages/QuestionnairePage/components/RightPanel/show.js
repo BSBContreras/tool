@@ -311,7 +311,7 @@ const Actions = () => {
 export default function ShowQuestions() {
   const useStyles = makeStyles(theme => ({
     container: {
-      height: 650,
+      height: 'calc(100vh - 70px)',
       overflowY: 'auto'
     },
     title: {
@@ -322,7 +322,7 @@ export default function ShowQuestions() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between'
-    }
+    },
   }))
 
   const { questionnaireController } = useContext(QuestionnaireContext);

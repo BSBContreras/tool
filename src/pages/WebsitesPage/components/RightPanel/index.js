@@ -18,6 +18,7 @@ import AddIcon from '@material-ui/icons/Add';
 import MoreVert from '@material-ui/icons/MoreVert'
 import Delete from '@material-ui/icons/Delete'
 import Tooltip from '@material-ui/core/Tooltip';
+import Divider from '@material-ui/core/Divider';
 import { WebsiteContext } from '../../context/WebsiteContext';
 import { TaskContext } from '../../context/TaskContext';
 import TaskProvider from '../../context/TaskContext';
@@ -87,8 +88,6 @@ const TaskItemUnavailable = ({ task }) => {
 }
 
 const TaskList = ({ website }) => {
-  const Divider = () => <hr></hr>;
-
   const { newTaskAddController } = useContext(TaskContext);
   const [ newTaskAdd, setNewTaskAdd ] = newTaskAddController;
 
@@ -125,10 +124,7 @@ const TaskList = ({ website }) => {
   }, [newTaskAdd, loadTasks, setNewTaskAdd]);
 
   return (
-    <List 
-      component="nav" 
-      style={{ padding: 10, height: 635, overflowY: 'auto'}}
-    >
+    <List component="div">
       <Typography variant="body1" align="center" style={{ color: '#777' }}>
         TASK LIST
       </Typography>
@@ -201,8 +197,6 @@ const PageItem = ({ page }) => {
 }
 
 const PageList = ({ website }) => {
-  const Divider = () => <hr></hr>;
-
   const { newPageAddController } = useContext(TaskContext);
   const [ newPageAdd, setNewPageAdd ] = newPageAddController;
 
@@ -232,7 +226,7 @@ const PageList = ({ website }) => {
   }, [newPageAdd, website, setNewPageAdd])
 
   return (
-    <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
+    <List component="div" style={{ padding: 10, height: 635, overflowY: 'auto'}}>
       <Typography variant="body1" align="center" style={{ color: '#777' }}>
         PAGE LIST
       </Typography>
@@ -292,8 +286,6 @@ const RouteItem = ({ page, index }) => {
 }
 
 const Constructor = () => {
-  const Divider = () => <hr></hr>;
-
   const { websiteController } = useContext(WebsiteContext);
   const [ currentWebsite ] = websiteController;
 
@@ -377,7 +369,7 @@ const Constructor = () => {
   }, [setSelectedsPages, currentTask]);
 
   return (
-    <List component="nav" style={{ padding: 10, height: 635, overflowY: 'auto' }}>
+    <List component="div" style={{ padding: 10, height: 635, overflowY: 'auto' }}>
       <Typography variant="body1" align="center" style={{ color: '#777' }}>
         CONSTRUCTOR
       </Typography>
@@ -446,8 +438,39 @@ const Constructor = () => {
 
 export default function RightPanel() {
   const useStyles = makeStyles(theme => ({
-    column: {
-      margin: theme.spacing(1),
+    container: {
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-around',
+      alignItems: 'center'
+    },
+    title: {
+      color: '#444'
+    },
+    svg: {
+      maxHeight: '350px'
+    },
+    link: {
+      color: theme.palette.primary.main,
+      cursor: 'pointer',
+      '&:hover': {
+        textDecoration: 'underline'
+      }
+    },
+    gridContainer: {
+      height: '100%'
+    },
+    gridItem: {
+      height: '100%',
+    },
+    paper: {
+      height: 'calc(100vh - 70px)',
+      overflowY: 'auto',
+      borderRight: '1px solid lightgrey',
+      borderBottom: '4px solid transparent',
+      padding: theme.spacing(1),
     }
   }));
 
@@ -465,51 +488,47 @@ export default function RightPanel() {
 
   const classes = useStyles();
 
-  return (
-    <Grid container>
-      {website.id ? (
-        <TaskProvider>
-            <Grid sm item className={classes.column}>
-              <Paper>
-                <TaskList website={website} />
-              </Paper>
-            </Grid>
-            <Grid sm item className={classes.column}>
-              <Paper>
-                <PageList website={website} />
-              </Paper>
-            </Grid>
-            <Grid sm item className={classes.column}>
-              <Paper>
-                <Constructor />
-              </Paper>
-            </Grid>
-        </TaskProvider>
-      ) : (
-        <div>
-          <Typography 
-            style={{ color: '#444', margin: 30 }} 
-            align="center" 
-            variant="h4"
-          >
-            Select a website on the Left
-          </Typography>
-          <img 
-            style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto', width: '50%' }} 
-            src={SelectWebsiteSvg} 
-            alt="Select some website" 
-          /> 
-          <Typography 
-            style={{ color: '#88f', margin: 30, cursor: 'pointer' }} 
-            align="center" 
-            variant="subtitle1"
-            onClick={handleClickOpenDialog}
-          >
-            Or Click here to add a New Website
-          </Typography>
-          {openDialog && <CreateWebsiteDialog handleClose={handleCloseDialog} />}
-        </div>
-      )}
-    </Grid>
+  return website.id ? (
+    <TaskProvider>
+      <Grid className={classes.gridContainer} container>
+        <Grid className={classes.gridItem} sm item>
+          <div className={classes.paper} style={{ borderBottomColor: 'blueviolet' }}>
+            <TaskList website={website} />
+          </div>
+        </Grid>
+        <Grid className={classes.gridItem} sm item>
+          <div className={classes.paper} style={{ borderBottomColor: 'blue' }}>
+            <PageList website={website} />
+          </div>
+        </Grid>
+        <Grid className={classes.gridItem} sm item>
+          <div className={classes.paper} style={{ borderBottomColor: 'yellow' }}>
+            <Constructor />
+          </div>
+        </Grid>
+      </Grid>
+    </TaskProvider>    
+  ) : (
+    <div className={classes.container}>
+      <Typography 
+        className={classes.title}
+        variant="h4"
+      >
+        Select a website on the Left
+      </Typography>
+      <img 
+        className={classes.svg}
+        src={SelectWebsiteSvg} 
+        alt="Select some website" 
+      /> 
+      <Typography 
+        className={classes.link}
+        variant="subtitle1"
+        onClick={handleClickOpenDialog}
+      >
+        Or Click here to add a New Website
+      </Typography>
+      {openDialog && <CreateWebsiteDialog handleClose={handleCloseDialog} />}
+    </div>
   );
 }
