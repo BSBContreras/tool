@@ -93,6 +93,19 @@ export const storeWebsite = (store) => {
   });
 }
 
+export const loadTasksByEvaluation = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/assessments/tasks.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
 export const loadEvaluatorsByEvaluation = (store) => {
   return new Promise(async (res, rej) => {
     const response = await api.post('/assessments/evaluators.php', store);

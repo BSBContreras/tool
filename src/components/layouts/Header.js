@@ -59,9 +59,9 @@ export default function Header({ setPage }) {
 					<Typography variant="h6" className={classes.title}>
 						Co-Inspect Tool
 					</Typography>
-					<Button color="inherit" onClick={() => setPage('EvaluationManagerPage')}>Evaluations</Button>
-					<Button color="inherit" onClick={() => setPage('QuestionnairePage')}>Questionnaires</Button>
 					<Button color="inherit" onClick={() => setPage('WebsitesPage')}>Websites</Button>
+					<Button color="inherit" onClick={() => setPage('QuestionnairePage')}>Questionnaires</Button>
+					<Button color="inherit" onClick={() => setPage('EvaluationManagerPage')}>Evaluations</Button>
 					<Button color="inherit" onClick={handleClickOpenMenu}>
 						<Typography noWrap style={{ maxWidth: '24ch' }}>
 							{manager.name}

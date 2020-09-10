@@ -56,7 +56,7 @@ const UnavailableQuestionnaireItem = ({ questionnaire }) => {
       <ListItem 
         button 
         onClick={handleOpenDialog}
-        selected={questionnaire === currentQuestionnaire}
+        selected={questionnaire.id === currentQuestionnaire.id}
       >
         <ListItemText 
           primary={questionnaire.name}

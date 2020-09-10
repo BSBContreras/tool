@@ -15,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import ShowEvaluators from './ShowEvaluators';
 import ShowQuestionnaire from './ShowQuestionnaire';
+import ShowTasks from './ShowTasks';
 
 import Tabs from '../../../../../components/Tabs'; 
 
@@ -280,18 +281,18 @@ export default function ShowEvaluationPanel() {
   const getTab = () => {
     return [
       'General', 
-      'Evaluators', 
+      'Tasks',
       'Questionnaire',
-      'Tasks'
+      'Evaluators'
     ]
   }
 
   const getPanel = (index) => {
     switch(index) {
       case 0: return <>General</>; 
-      case 1: return <ShowEvaluators />;
+      case 1: return <ShowTasks />;
       case 2: return <ShowQuestionnaire />;
-      case 3: return <>Tasks</>;
+      case 3: return <ShowEvaluators />;
       default: return <>Not Found</>;
     }
   }

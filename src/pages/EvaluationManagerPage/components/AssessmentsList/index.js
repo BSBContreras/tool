@@ -30,7 +30,7 @@ const AssessmentItem = ({ assessment }) => {
     <ListItem 
       button 
       onClick={handleCurrentAssessment}
-      selected={assessment === currentAssessment}
+      selected={assessment.id === currentAssessment.id}
     >
       <ListItemText 
         primary={assessment.name}

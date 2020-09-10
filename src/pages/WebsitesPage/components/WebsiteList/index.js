@@ -24,7 +24,7 @@ const WebsiteItem = ({ website }) => {
     <ListItem 
       button 
       onClick={handleCurrentWebsite}
-      selected={website === currentWebsite}
+      selected={website.id === currentWebsite.id}
     >
       <ListItemText 
         primary={website.name}

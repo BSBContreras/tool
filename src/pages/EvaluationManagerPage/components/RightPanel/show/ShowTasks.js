@@ -17,7 +17,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 import { AssessmentContext } from '../../../context/AssessmentContext';
 
-import { loadQuestionsByQuestionnaire } from '../../../../../routes';
+import { loadTasksByEvaluation } from '../../../../../routes';
 import { RUNTIME_ERROR } from '../../../../../constants';
 
 const answers = [
@@ -66,24 +66,24 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Question = ({ question }) => {
+const Question = ({ task }) => {
 
   const classes = useStyles();
 
   return (
     <div className={classes.containerQuestion}>
-      {question.id ? (
+      {task.id ? (
         <>
           <QuestionAnswerOutlinedIcon className={classes.questionIcon} />
           <div className={classes.contentQuestion}>
             <Typography variant="h6">
-              {question.criterion}
+              {task.name}
             </Typography>
             <Typography variant="subtitle1">
-              {question.text}
+              {task.detail}
             </Typography>
           </div>
-          <div className={classes.listContainer}>
+          {/* <div className={classes.listContainer}>
             <List 
               className={classes.listRoot}
               subheader={
@@ -106,36 +106,37 @@ const Question = ({ question }) => {
                 </React.Fragment>
               ))}
             </List>
-          </div>
+          </div> */}
         </>
       ) : (
         <Typography variant="body1">
-          Select some question to view details
+          Select some task to view details
         </Typography>
       )}
     </div>
   )
 }
 
-export default function ShowQuestionnaire() {
+export default function ShowTaks() {
 
   const { currentAssessmentController } = useContext(AssessmentContext);
   const [ currentAssessment ] = currentAssessmentController;
 
-  const [questions, setQuestions] = useState([]);
-  const [question, setQuestion] = useState({});
+  const [tasks, setTasks] = useState([]);
+  const [task, setTask] = useState({});
 
-  const handleSelectQuestion = (question) => {
-    setQuestion(question);
+  const handleSelectQuestion = (task) => {
+    setTask(task);
   }
 
   useEffect(() => {
     if(currentAssessment.id) {
-      loadQuestionsByQuestionnaire({
+      loadTasksByEvaluation({
         id: Number(currentAssessment.questionnaire_id)
       }).then(data => {
+        console.log(data);
 
-        setQuestions(data);
+        setTasks(data);
       }).catch(error => {
 
         if(Number(error.id) !== RUNTIME_ERROR) {
@@ -146,10 +147,11 @@ export default function ShowQuestionnaire() {
 
       })
     }
-  }, [currentAssessment])
+  }, [currentAssessment]);
+
 
   useEffect(() => {
-    setQuestion({});
+    setTask({});
   }, [currentAssessment]);
 
   const classes = useStyles()
@@ -158,23 +160,23 @@ export default function ShowQuestionnaire() {
     <Grid container>
       <Grid item sm={5}>
         <List className={classes.listRoot}>
-          {questions.map((question, index) => (
-            <React.Fragment key={question.id}>
-              <ListItem button onClick={() => handleSelectQuestion(question)}>
+          {tasks.map((task, index) => (
+            <React.Fragment key={task.id}>
+              <ListItem button onClick={() => handleSelectQuestion(task)}>
                 <ListItemAvatar>
                   <Avatar>
                     <QuestionAnswerIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={question.criterion} secondary={question.text} />
+                <ListItemText primary={task.name} secondary={task.detail} />
               </ListItem>
-              {index < questions.length - 1 && <Divider variant="inset" component="li" />}
+              {index < tasks.length - 1 && <Divider variant="inset" component="li" />}
             </React.Fragment>
           ))}
         </List>
       </Grid>
       <Grid item sm={7}>
-        <Question question={question} />
+        <Question task={task} />
       </Grid>
     </Grid>
   );
