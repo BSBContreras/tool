@@ -13,11 +13,10 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 import QuestionAnswerOutlinedIcon from '@material-ui/icons/QuestionAnswerOutlined';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 import { AssessmentContext } from '../../../context/AssessmentContext';
 
-import { loadQuestionsByQuestionnaire } from '../../../../../routes';
+import { showQuestionnaire, loadQuestionsByQuestionnaire } from '../../../../../routes';
 import { RUNTIME_ERROR } from '../../../../../constants';
 
 const answers = [
@@ -46,9 +45,11 @@ const answers = [
 const useStyles = makeStyles(theme => ({
   listRoot: {
     width: '100%',
+    height: '100%'
   },
   listContainer: {
     width: '100%',
+    height: '100%',
     padding: theme.spacing(0, 3)
   },
   containerQuestion: {
@@ -87,7 +88,7 @@ const Question = ({ question }) => {
             <List 
               className={classes.listRoot}
               subheader={
-                <ListSubheader component="div" id="list-subheader">
+                <ListSubheader component="div">
                   Answers
                 </ListSubheader>
               }
@@ -122,6 +123,7 @@ export default function ShowQuestionnaire() {
   const { currentAssessmentController } = useContext(AssessmentContext);
   const [ currentAssessment ] = currentAssessmentController;
 
+  const [questionnaire, setQuestionnaire] = useState({});
   const [questions, setQuestions] = useState([]);
   const [question, setQuestion] = useState({});
 
@@ -130,9 +132,28 @@ export default function ShowQuestionnaire() {
   }
 
   useEffect(() => {
-    if(currentAssessment.id) {
-      loadQuestionsByQuestionnaire({
+    if(currentAssessment.questionnaire_id) {
+      showQuestionnaire({
         id: Number(currentAssessment.questionnaire_id)
+      }).then(data => {
+
+        setQuestionnaire(data);
+      }).catch(error => {
+
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+        } else {
+          alert('Error on load Questionnaire');
+        }
+
+      })
+    }
+  }, [currentAssessment]);
+
+  useEffect(() => {
+    if(questionnaire.id) {
+      loadQuestionsByQuestionnaire({
+        id: Number(questionnaire.id)
       }).then(data => {
 
         setQuestions(data);
@@ -146,7 +167,7 @@ export default function ShowQuestionnaire() {
 
       })
     }
-  }, [currentAssessment])
+  }, [questionnaire]);
 
   useEffect(() => {
     setQuestion({});
@@ -157,7 +178,14 @@ export default function ShowQuestionnaire() {
   return (
     <Grid container>
       <Grid item sm={5}>
-        <List className={classes.listRoot}>
+        <List 
+          className={classes.listRoot}
+          subheader={
+            <ListSubheader component="div">
+              Answers
+            </ListSubheader>
+          }
+        >
           {questions.map((question, index) => (
             <React.Fragment key={question.id}>
               <ListItem button onClick={() => handleSelectQuestion(question)}>

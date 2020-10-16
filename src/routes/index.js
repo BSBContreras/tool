@@ -94,6 +94,8 @@ export const storeWebsite = (store) => {
 }
 
 export const loadTasksByEvaluation = (store) => {
+  console.log(store);
+
   return new Promise(async (res, rej) => {
     const response = await api.post('/assessments/tasks.php', store);
 
@@ -265,6 +267,19 @@ export const duplicateQuestionnaire = (store) => {
       res(data.docs);
     } else {
       rej({ id: STORE_ERROR, detail: 'Error on duplicate questionnaire'});
+    }
+  });
+}
+
+export const showQuestionnaire = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/questionnaires/show.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
     }
   });
 }

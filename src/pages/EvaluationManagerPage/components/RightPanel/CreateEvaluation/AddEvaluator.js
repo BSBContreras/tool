@@ -12,16 +12,16 @@ import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 
-import Dialog from '../../../../components/Dialog';
-import AlertMessage from '../../../../components/AlertMessage';
-import ListItemDefault from '../../../../components/ListItemDefault';
-import BlueCheckbox from '../../../../components/BlueCheckbox';
-import Button from '../../../../components/Button';
+import Dialog from '../../../../../components/Dialog';
+import AlertMessage from '../../../../../components/AlertMessage';
+import ListItemDefault from '../../../../../components/ListItemDefault';
+import BlueCheckbox from '../../../../../components/BlueCheckbox';
+import Button from '../../../../../components/Button';
 
-import { loadEvaluatorsByEmail, loadProfiles, storeEvaluator } from '../../../../routes';
+import { loadEvaluatorsByEmail, loadProfiles, storeEvaluator } from '../../../../../routes';
 
-import { RUNTIME_ERROR, CANCEL } from '../../../../constants';
-import { validateEmail, validateName } from '../../../../utils';
+import { RUNTIME_ERROR, CANCEL } from '../../../../../constants';
+import { validateEmail, validateName } from '../../../../../utils';
 
 const useStyles = makeStyles(theme => ({
   textfield: {

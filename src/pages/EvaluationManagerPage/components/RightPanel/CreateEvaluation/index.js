@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { CreateAssessmentContext } from '../../context/CreateAssessmentContext';
-import { AssessmentContext } from '../../context/AssessmentContext';
-import CompletedStepsSvg from '../../../../assets/completed_steps.svg';
+import { CreateAssessmentContext } from '../../../context/CreateAssessmentContext';
+import { AssessmentContext } from '../../../context/AssessmentContext';
+import CompletedStepsSvg from '../../../../../assets/completed_steps.svg';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Stepper from '@material-ui/core/Stepper';
@@ -20,9 +20,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 
 import AddEvaluator from './AddEvaluator';
 
-import ListItemDefault from '../../../../components/ListItemDefault';
-import { GlobalContext } from '../../../../context/GlobalContext';
-import { RUNTIME_ERROR } from '../../../../constants';
+import ListItemDefault from '../../../../../components/ListItemDefault';
+import { GlobalContext } from '../../../../../context/GlobalContext';
+import { RUNTIME_ERROR } from '../../../../../constants';
 import { 
   loadQuestionnairesByManager, 
   loadQuestionsByQuestionnaire, 
@@ -31,7 +31,7 @@ import {
   loadEvaluatorsByProfile,
   loadProfiles,
   storeEvaluation
-} from '../../../../routes';
+} from '../../../../../routes';
 
 const Divider = ({...props}) => <hr {...props}></hr>
 

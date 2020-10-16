@@ -16,6 +16,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ShowEvaluators from './ShowEvaluators';
 import ShowQuestionnaire from './ShowQuestionnaire';
 import ShowTasks from './ShowTasks';
+import ShowGeneral from './ShowGeneral';
 
 import Tabs from '../../../../../components/Tabs'; 
 
@@ -244,11 +245,8 @@ export default function ShowEvaluationPanel() {
       padding: theme.spacing(1)
     },
     content: {
-      height: 'calc(100% - 45px)', 
-      boxShadow: '2px 2px 2px 1px rgba(0, 0, 0, 0.1)',
-      zIndex: 5,
       padding: theme.spacing(1),
-      borderRadius: theme.spacing(0, 0, 1, 1),
+      height: 'calc(100% - 45px)'
     }
   }));
 
@@ -289,7 +287,7 @@ export default function ShowEvaluationPanel() {
 
   const getPanel = (index) => {
     switch(index) {
-      case 0: return <>General</>; 
+      case 0: return <ShowGeneral />; 
       case 1: return <ShowTasks />;
       case 2: return <ShowQuestionnaire />;
       case 3: return <ShowEvaluators />;
@@ -297,7 +295,7 @@ export default function ShowEvaluationPanel() {
     }
   }
 
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(0);
 
   const handleChange = (newValue) => {
     setValue(newValue);
@@ -315,7 +313,9 @@ export default function ShowEvaluationPanel() {
             tabs={getTab()}
           />
         </div>
-        <div className={classes.content}> {getPanel(value)} </div>
+        <div className={classes.content}> 
+          {getPanel(value)} 
+        </div>
       </div>
   ) : (
     <div className={classes.container}>
