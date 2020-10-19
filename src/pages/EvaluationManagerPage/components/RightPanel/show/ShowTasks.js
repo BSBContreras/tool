@@ -5,6 +5,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import Divider from '@material-ui/core/Divider';
 
 import MenuItem from '@material-ui/core/MenuItem';
@@ -13,14 +14,21 @@ import InputBase from '@material-ui/core/InputBase';
 
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 
+// Icons
 import PointIcon from '@material-ui/icons/FiberManualRecord';
 import EndPointIcon from '@material-ui/icons/DonutLarge';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
 
 import BoardRounded from './BoardRounded';
 
 import { AssessmentContext } from '../../../context/AssessmentContext';
 
-import { loadTasksByEvaluation } from '../../../../../routes';
+import { 
+  loadEvaluatorsByEvaluation,
+  loadTasksByEvaluation, 
+  loadPathTask 
+} from '../../../../../routes';
 import { RUNTIME_ERROR } from '../../../../../constants';
 
 const useStyles = makeStyles(theme => ({
@@ -37,10 +45,14 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'space-around'
   },
   list: {
     width: '100%',
+  },
+  arrowButton: { 
+    fontSize: '24px', 
+    cursor: 'pointer' 
   }
 }));
 
@@ -64,11 +76,60 @@ export default function ShowTaks() {
   const [ currentAssessment ] = currentAssessmentController;
 
   const [tasks, setTasks] = useState([]);
-  const [task, setTask] = useState({});
+  const [taskId, setTaskId] = useState('');
+  const [taskPath, setTaskPath] = useState([]);
+  const [evaluators, setEvaluators] = useState([]);
+  const [evaluatorId, setEvaluatorId] = useState([]);
 
   const handleSelectTask = (event) => {
-    setTask(event.target.value);
+    const taskId = event.target.value;
+
+    if(taskId.length > 0) {
+      loadPathTask({ 
+        task_id: taskId 
+      }).then(data => {
+
+        setTaskPath(data);
+      }).catch(error => {
+
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+        } else {
+          alert('Error on Task Path');
+        }
+
+      }).finally(() => {
+
+        setTaskId(taskId);
+      })
+    }
   };
+
+  const handleSelectEvaluator = (event) => {
+    const evaluatorId = event.target.value;
+
+
+    setEvaluatorId(evaluatorId);
+  }
+
+  useEffect(() => {
+    if(currentAssessment.id) {
+      loadEvaluatorsByEvaluation({
+        id: Number(currentAssessment.id)
+      }).then(data => {
+
+        setEvaluators(data);
+      }).catch(error => {
+
+        if(Number(error.id) !== RUNTIME_ERROR) {
+          alert(error.detail);
+        } else {
+          alert('Error on load Evaluators');
+        }
+
+      })
+    }
+  }, [currentAssessment]);
 
   useEffect(() => {
     if(currentAssessment.id) {
@@ -90,10 +151,10 @@ export default function ShowTaks() {
   }, [currentAssessment]);
 
   useEffect(() => {
-    setTask({});
+    setTaskId('');
   }, [currentAssessment]);
 
-  const classes = useStyles()
+  const classes = useStyles();
 
   return (
     <Grid container className={classes.container}>
@@ -101,48 +162,89 @@ export default function ShowTaks() {
         <BoardRounded className={classes.content}>
           <div className={classes.header}>
             <Select
-              fullWidth
               id="select-task"
-              value={task}
-              defaultValue="Select some Task"
+              fullWidth
+              displayEmpty
+              value={taskId}
               onChange={handleSelectTask}
               input={<SelectStyled />}
-              renderValue={(selected) => (selected.id ? selected.name : 'Select some task')}
             >
-              <MenuItem disabled value={{}}>
+              <MenuItem disabled value="">
                 <em>Select some task</em>
               </MenuItem>
               {tasks.map(task => (
-                <MenuItem key={task.id} value={task}>{task.name}</MenuItem>
+                <MenuItem key={task.id} value={task.id}>
+                  {task.name}
+                </MenuItem>
               ))}
             </Select>
           </div>
           <Divider />
-          <List className={classes.list}>
-            <ListItem>
-              <ListItemIcon>
-                <PointIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sent mail" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <PointIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sent mail" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <EndPointIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sent mail" />
-            </ListItem>
+          <List 
+            className={classes.list}
+            subheader={
+              <ListSubheader component="div" id="list-subheader">
+                Made by Bruno Contreras
+              </ListSubheader>
+            }
+          >
+            {taskPath.map((page, index) => (
+              <ListItem key={index}>
+                <ListItemIcon>
+                  {index < taskPath.length - 1 ? <PointIcon /> : <EndPointIcon />}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={page.name} 
+                  secondary={page.url}
+                />
+              </ListItem>
+            ))}
           </List>
         </BoardRounded>
       </Grid>
       <Grid item sm={6}>
         <BoardRounded className={classes.content}>
-          Tasks
+          <div className={classes.header}>
+            <Select
+              id="select-evaluator"
+              fullWidth
+              displayEmpty
+              value={evaluatorId}
+              onChange={handleSelectEvaluator}
+              input={<SelectStyled />}
+              renderValue={(selected) => {
+                const evaluator = evaluators.find(evaluator => evaluator.id === selected)
+
+                if(evaluator) {
+                  return evaluator.name;
+                } else {
+                  return <em>Select some evaluator</em>
+                }
+              }}
+            >
+              <MenuItem disabled value="">
+                <em>Select some evaluator</em>
+              </MenuItem>
+              {evaluators.map(evaluator => (
+                <MenuItem key={evaluator.id} value={evaluator.id}>
+                  <ListItemText 
+                    primary={evaluator.name} 
+                    secondary={evaluator.email}
+                  />
+                  {Math.random() <= 0.5 ? (
+                    <ListItemIcon>
+                      <CheckCircleIcon style={{ color: '#7D7' }} />
+                    </ListItemIcon>
+                  ) : (
+                    <ListItemIcon>
+                      <HourglassEmptyIcon />
+                    </ListItemIcon>
+                  )}                  
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+          <Divider />
         </BoardRounded>
       </Grid>
     </Grid>

@@ -94,10 +94,21 @@ export const storeWebsite = (store) => {
 }
 
 export const loadTasksByEvaluation = (store) => {
-  console.log(store);
-
   return new Promise(async (res, rej) => {
     const response = await api.post('/assessments/tasks.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadPathTask = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/tasks/pages.php', store);
 
     const { data } = response;
     if(data.status === SUCCESS) {
