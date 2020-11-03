@@ -4,119 +4,53 @@ import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
-import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
-import QuestionAnswerOutlinedIcon from '@material-ui/icons/QuestionAnswerOutlined';
+import BoardRounded from './BoardRounded';
 
 import { AssessmentContext } from '../../../context/AssessmentContext';
 
-import { showQuestionnaire, loadQuestionsByQuestionnaire } from '../../../../../routes';
+import { 
+  showQuestionnaire, 
+  loadQuestionsByQuestionnaire 
+} from '../../../../../routes';
+
 import { RUNTIME_ERROR } from '../../../../../constants';
 
-const answers = [
-  {
-    id: 1,
-    evaluator_name: 'Bruno Contreras',
-    text: 'yes'
-  },
-  {
-    id: 2,
-    evaluator_name: 'Marcelo Morandini',
-    text: 'yes'
-  },
-  {
-    id: 3,
-    evaluator_name: 'Thiago',
-    text: 'no'
-  },
-  {
-    id: 4,
-    evaluator_name: 'Jorge',
-    text: 'yes'
-  },
-]
-
 const useStyles = makeStyles(theme => ({
-  listRoot: {
-    width: '100%',
+  container: {
     height: '100%'
   },
+  content: {
+    height: '100%',
+    margin: theme.spacing(0, 2),
+    padding: theme.spacing(3)
+  },
+  header: {
+    height: '75px',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  title: {
+    fontSize: '24px'
+  },
   listContainer: {
+    position: 'relative',
+    height: 'calc(100% - 75px)',
+  },
+  list: {
     width: '100%',
     height: '100%',
-    padding: theme.spacing(0, 3)
-  },
-  containerQuestion: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  contentQuestion: {
-    padding: theme.spacing(0, 3),
-    width: '100%'
-  },
-  questionIcon: {
-    margin: theme.spacing(2, 0),
-    fontSize: '128px'
+    overflowY: 'auto',
+    position: 'absolute',
+    left: 0,
+    top: 0,
   }
 }));
-
-const Question = ({ question }) => {
-
-  const classes = useStyles();
-
-  return (
-    <div className={classes.containerQuestion}>
-      {question.id ? (
-        <>
-          <QuestionAnswerOutlinedIcon className={classes.questionIcon} />
-          <div className={classes.contentQuestion}>
-            <Typography variant="h6">
-              {question.criterion}
-            </Typography>
-            <Typography variant="subtitle1">
-              {question.text}
-            </Typography>
-          </div>
-          <div className={classes.listContainer}>
-            <List 
-              className={classes.listRoot}
-              subheader={
-                <ListSubheader component="div">
-                  Answers
-                </ListSubheader>
-              }
-            >
-              {answers.map((answer, index) => (
-                <React.Fragment key={answer.id}>
-                  <ListItem button onClick={() => {}}>
-                    <ListItemAvatar>
-                      <Avatar>
-                        <QuestionAnswerIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={answer.evaluator_name} secondary={answer.text} />
-                  </ListItem>
-                  {index < answers.length - 1 && <Divider variant="inset" component="li" />}
-                </React.Fragment>
-              ))}
-            </List>
-          </div>
-        </>
-      ) : (
-        <Typography variant="body1">
-          Select some question to view details
-        </Typography>
-      )}
-    </div>
-  )
-}
 
 export default function ShowQuestionnaire() {
 
@@ -125,10 +59,10 @@ export default function ShowQuestionnaire() {
 
   const [questionnaire, setQuestionnaire] = useState({});
   const [questions, setQuestions] = useState([]);
-  const [question, setQuestion] = useState({});
+  const [selected, setSelected] = useState({});
 
-  const handleSelectQuestion = (question) => {
-    setQuestion(question);
+  const handleSelectQuestion = (selected) => {
+    setSelected(selected);
   }
 
   useEffect(() => {
@@ -170,39 +104,49 @@ export default function ShowQuestionnaire() {
   }, [questionnaire]);
 
   useEffect(() => {
-    setQuestion({});
+    setSelected({});
   }, [currentAssessment]);
 
   const classes = useStyles()
 
   return (
-    <Grid container>
-      <Grid item sm={5}>
-        <List 
-          className={classes.listRoot}
-          subheader={
-            <ListSubheader component="div">
-              Answers
-            </ListSubheader>
-          }
-        >
-          {questions.map((question, index) => (
-            <React.Fragment key={question.id}>
-              <ListItem button onClick={() => handleSelectQuestion(question)}>
-                <ListItemAvatar>
-                  <Avatar>
-                    <QuestionAnswerIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={question.criterion} secondary={question.text} />
-              </ListItem>
-              {index < questions.length - 1 && <Divider variant="inset" component="li" />}
-            </React.Fragment>
-          ))}
-        </List>
+    <Grid container className={classes.container}>
+      <Grid item sm={6}>
+        <BoardRounded className={classes.content}>
+          <div className={classes.header}>
+            <Typography className={classes.title}>
+              {questionnaire.name}
+            </Typography>
+          </div>
+          <Divider />
+          <div className={classes.listContainer}>
+            <List className={classes.list}>
+              {questions.map(question => (
+                <ListItem 
+                  button 
+                  key={question.id} 
+                  selected={question.id === selected.id}
+                  onClick={() => handleSelectQuestion(question)}
+                >
+                  <ListItemText 
+                    primary={question.criterion} 
+                    secondary={question.text}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </div>
+        </BoardRounded>
       </Grid>
-      <Grid item sm={7}>
-        <Question question={question} />
+      <Grid item sm={6}>
+        <BoardRounded className={classes.content}>
+          <div className={classes.header}>
+            <Typography className={classes.title}>
+              Answers
+            </Typography>
+          </div>
+          <Divider />
+        </BoardRounded>
       </Grid>
     </Grid>
   );

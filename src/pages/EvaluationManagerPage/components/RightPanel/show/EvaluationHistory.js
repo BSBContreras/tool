@@ -70,11 +70,12 @@ const History = () => {
   return (
     <List className={classes.list}>
       {history.map((item) => (
-        <React.Fragment key={item.id}>
-          <ListItem onClick={() => {}}>
-            <ListItemText primary={item.data} secondary={item.date} />
-          </ListItem>
-        </React.Fragment>
+        <ListItem key={item.id}>
+          <ListItemText 
+            primary={item.data} 
+            secondary={item.date} 
+          />
+        </ListItem>
       ))}
     </List>
   );

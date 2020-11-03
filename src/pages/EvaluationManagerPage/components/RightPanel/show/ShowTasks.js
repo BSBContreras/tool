@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListSubheader from '@material-ui/core/ListSubheader';
+import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 
 import MenuItem from '@material-ui/core/MenuItem';
@@ -18,7 +19,8 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import PointIcon from '@material-ui/icons/FiberManualRecord';
 import EndPointIcon from '@material-ui/icons/DonutLarge';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
+import ScheduleIcon from '@material-ui/icons/Schedule';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 import BoardRounded from './BoardRounded';
 
@@ -38,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   content: {
     height: '100%',
     margin: theme.spacing(0, 2),
-    padding: theme.spacing(3)
+    padding: theme.spacing(3),
   },
   header: {
     height: '75px',
@@ -47,12 +49,35 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'space-around'
   },
+  designerListContainer: {
+    position: 'relative',
+    height: 'calc(100% - 75px)',
+  },
+  evaluatorListContainer: {
+    position: 'relative',
+    height: 'calc(100% - 75px - 50px)',
+  },
   list: {
     width: '100%',
+    height: '100%',
+    overflowY: 'auto',
+    position: 'absolute',
+    left: 0,
+    top: 0,
   },
-  arrowButton: { 
-    fontSize: '24px', 
-    cursor: 'pointer' 
+  footer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    height: '50px'
+  },
+  matchesButton: {
+    backgroundColor: '#5D5',
+    color: '#FFF'
+  },
+  doesnotMatchesButton: {
+    backgroundColor: '#D55',
+    color: '#FFF'
   }
 }));
 
@@ -180,26 +205,28 @@ export default function ShowTaks() {
             </Select>
           </div>
           <Divider />
-          <List 
-            className={classes.list}
-            subheader={
-              <ListSubheader component="div" id="list-subheader">
-                Made by Bruno Contreras
-              </ListSubheader>
-            }
-          >
-            {taskPath.map((page, index) => (
-              <ListItem key={index}>
-                <ListItemIcon>
-                  {index < taskPath.length - 1 ? <PointIcon /> : <EndPointIcon />}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={page.name} 
-                  secondary={page.url}
-                />
-              </ListItem>
-            ))}
-          </List>
+          <div className={classes.designerListContainer}>
+            <List 
+              className={classes.list}
+              subheader={
+                <ListSubheader component="div" id="list-subheader">
+                  Made by Bruno Contreras
+                </ListSubheader>
+              }
+            >
+              {taskPath.map((page, index) => (
+                <ListItem key={index}>
+                  <ListItemIcon>
+                    {index < taskPath.length - 1 ? <PointIcon /> : <EndPointIcon />}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={page.name} 
+                    secondary={page.url}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </div>
         </BoardRounded>
       </Grid>
       <Grid item sm={6}>
@@ -237,7 +264,7 @@ export default function ShowTaks() {
                     </ListItemIcon>
                   ) : (
                     <ListItemIcon>
-                      <HourglassEmptyIcon />
+                      <ScheduleIcon />
                     </ListItemIcon>
                   )}                  
                 </MenuItem>
@@ -245,6 +272,26 @@ export default function ShowTaks() {
             </Select>
           </div>
           <Divider />
+          <div className={classes.evaluatorListContainer}>
+            
+          </div>
+          <Divider />
+          <div className={classes.footer}>
+            <Button
+              variant="contained"
+              className={classes.matchesButton}
+              startIcon={<CheckCircleIcon />}
+            >
+              Matches
+            </Button>
+            <Button
+              variant="contained"
+              className={classes.doesnotMatchesButton}
+              startIcon={<CancelIcon />}
+            >
+              Does Not Matches
+            </Button>
+          </div>
         </BoardRounded>
       </Grid>
     </Grid>
