@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -8,6 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
+import Tooltip from '@material-ui/core/Tooltip';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 
@@ -158,11 +161,16 @@ const DialogQuestionsToSend = ({ handleCloseDialog, path }) => {
   const [ currentAssessment ] = currentAssessmentController;
 
   const [questions, setQuestions] = useState([]);
+  const [copied, setCopied] = useState(false)
+  const [csv, setCsv] = useState('')
 
   const getQuestions = async () => {
     const questionsToSend = await getQuestionsToSend(path, currentAssessment);
+    setCsv(`Question_Text|Ergonomic_Criterion|Answer_Type|Interaction_Element_1|Interaction_Element_2\n${questionsToSend.map(question => Object.values(question).filter((_, i) => i % 2 === 1).map(item => item ? item : 'null').join('|')).join('\n')}`)
     setQuestions(questionsToSend);
   }
+
+  const getCsv = () => csv
   
   useEffect(() => {
     getQuestions();
@@ -176,6 +184,23 @@ const DialogQuestionsToSend = ({ handleCloseDialog, path }) => {
       submit={handleCloseDialog}
       maxWidth="md"
     >
+      <CopyToClipboard
+        text={getCsv()}
+        onCopy={() => setCopied(true)}
+      >
+        <Tooltip
+          title={
+            copied
+              ? "This was Copied!"
+              : "Copy To Clipboard"
+          }
+          placement="top"
+        >
+          <Button size="medium" fullWidth>
+            Export to CSV
+          </Button>
+        </Tooltip>
+      </CopyToClipboard>
       <List >
         {questions.map((question, index) => (
           <ListItem key={index}>

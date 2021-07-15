@@ -63,7 +63,7 @@ export default function ShowEvaluationPanel() {
       'General', 
       'Tasks',
       'Questionnaire',
-      'Evaluators'
+      'View Evaluators'
     ]
   }
 
