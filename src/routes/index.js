@@ -294,3 +294,88 @@ export const showQuestionnaire = (store) => {
     }
   });
 }
+
+export const showQuestion = (store) => {
+  return new Promise(async (res, rej) => {
+    const response = await api.post('/questions/show.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const showEvaluation = (store) => {
+  return new Promise(async (res, rej) => {
+
+    const response = await api.post('/assessments/show.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const showWebsiteByEvaluation = (store) => {
+  return new Promise(async (res, rej) => {
+
+    const response = await api.post('/assessments/website.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadPagesByWebsite = (store) => {
+  return new Promise(async (res, rej) => {
+
+    const response = await api.post('/websites/pages.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const loadTaskPathByUserAndTask = (store) => {
+  return new Promise(async (res, rej) => {
+
+    const response = await api.post('/tasks/pages_user.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}
+
+export const storeEvaluatorPathTask = (store) => {
+  return new Promise(async (res, rej) => {
+
+    console.log(store)
+
+    const response = await api.post('/tasks/sync_user.php', store);
+
+    const { data } = response;
+    if(data.status === SUCCESS) {
+      res(data.docs);
+    } else {
+      rej(data.docs);
+    }
+  });
+}

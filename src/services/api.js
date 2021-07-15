@@ -1,5 +1,5 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: 'http://www.each.usp.br/cond_met_pand/tool/api'});
+const api = axios.create({ baseURL: 'http://joinsoft.com.br/coinspect/api/'});
 
 export default api;

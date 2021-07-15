@@ -4,7 +4,7 @@ import QuestionnairePage from './QuestionnairePage';
 import EvaluationManagerPage from './EvaluationManagerPage';
 import WebsitesPage from './WebsitesPage';
 
-import { Header } from '../components/Layouts';
+import Header from '../components/layouts/Header';
 
 import { GlobalContext } from '../context/GlobalContext';
 import { makeStyles } from '@material-ui/core/styles';
